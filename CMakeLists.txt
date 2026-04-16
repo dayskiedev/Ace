@@ -12,9 +12,9 @@ add_executable(ace)
 
 FetchContent_Declare(
 	SDL3
-	GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-   	GIT_TAG origin/main
-   	OVERRIDE_FIND_PACKAGE  # ensure this fetchcontent has first been called
+	GIT_REPOSITORY https://github.com/libsdl-org/SDL.git	# source for SDL we are using
+   	GIT_TAG 5848e584a1b606de26e3dbd1c7e4ecbc34f807a6		# release 3.4.4 (stick to release, dont want the latest each time)
+   	OVERRIDE_FIND_PACKAGE  								    # ensure this fetchcontent has first been called
 )
 
 # check if the user has SDL3 installed, if not we want to include it.
@@ -22,8 +22,14 @@ FetchContent_MakeAvailable(SDL3)
 
 # get project files
 target_sources(ace
-   PRIVATE
-      src/main.cpp
+	PRIVATE
+    	src/main.cpp
+	PUBLIC 
+		FILE_SET HEADERS
+		BASE_DIRS
+			src/include
+		FILES
+		 	src/include/testHeader.h
 )
 
 

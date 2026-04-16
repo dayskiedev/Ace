@@ -2,6 +2,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+#include "testHeader.h"
+
 // change build structure/initial setup, run cmake -S . -B build
 // to actually build, run cmake --build build
 // then ./debug/ace.exe
@@ -61,8 +63,8 @@ void close()
 
 int main(int argc, char* args[]){
     int exitCode { 0 };
-
-    std::cout << "Launching...\n";
+    testHeader t;
+    std::cout << "Launching... with test num " << t.testNum << "\n";
 
     if(init() == false) {
         SDL_Log("Unable to init!\n");
