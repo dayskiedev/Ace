@@ -8,6 +8,7 @@
 
 #include "testHeader.h"
 #include "c8_emulator.h"
+#include "c8_utils.h"
 
 // ACE Chip8 Emulator 
 // Brody Watson 2026
@@ -89,6 +90,9 @@ int main(int argc, char* args[]){
 
     c8_emulator emulator;
     emulator.Startup();
+
+    c8_utils utils;
+    utils.CheckFont(emulator.GetMemory(), 80, false);
 
     int exitCode { 0 };
     testHeader t;
