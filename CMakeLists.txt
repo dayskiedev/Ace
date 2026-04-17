@@ -30,12 +30,13 @@ FetchContent_MakeAvailable(SDL3)
 target_sources(ace
 	PRIVATE
     	src/main.cpp
+
 	PUBLIC 
 		FILE_SET HEADERS
 		BASE_DIRS
 			src/include
 		FILES
-		 	src/include/testHeader.h
+
 )
 
 

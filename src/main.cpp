@@ -12,15 +12,20 @@
 
 // constexpr evaluates at compile rather than runtime
 // brace init for type safety (?)
-constexpr int RELATIVE_SCREEN_WIDTH { 32 };
-constexpr int RELATIVE_SCREEN_HEIGHT { 64 }; 
+constexpr int RELATIVE_SCREEN_WIDTH { 320 };
+constexpr int RELATIVE_SCREEN_HEIGHT { 640 }; 
 std::string PROGRAM_NAME { "ACE" };
 
-int RESOLUTION_SCALE { 12 };
+int RESOLUTION_SCALE { 1 };
 
 SDL_Window* gWindow { nullptr };
 SDL_Surface* gScreenSurface { nullptr };
 SDL_Renderer* gRenderer { nullptr };
+
+
+// CHIP8 Specifc
+int PROGRAM_COUNTER; // points to the current instruction in memory (should be a pointer then?)
+
 
 bool Init() {
 	//initialze sdl
@@ -30,27 +35,26 @@ bool Init() {
 	}
 	std::cout << "SDL initialised" << std::endl;
 
-	// Create window
-	gWindow = SDL_CreateWindow(PROGRAM_NAME.c_str(), RELATIVE_SCREEN_WIDTH, RELATIVE_SCREEN_HEIGHT, 0);
-	if (gWindow == NULL) {
-		std::cout << "Window could not be created!" << std::endl;
-		return false;
-	}
-	std::cout << "Window created" << std::endl;
+    // Create window
+    gWindow = SDL_CreateWindow(PROGRAM_NAME.c_str(), RELATIVE_SCREEN_WIDTH, RELATIVE_SCREEN_HEIGHT, 0);
+    if (gWindow == NULL) {
+        std::cout << "Window could not be created!" << std::endl;
+        return false;
+    }
+    std::cout << "Window created" << std::endl;
 
-	// Create Renderer for window
-	gRenderer = SDL_CreateRenderer(gWindow, NULL);
-	if (gRenderer == NULL) {
-		std::cout << "Renderer could not be created: " << SDL_GetError() << std::endl;
-		return false;
-	}
-	std::cout << "Renderer created" << std::endl;
+    // Create Renderer for window
+    gRenderer = SDL_CreateRenderer(gWindow, NULL);
+    if (gRenderer == NULL) {
+        std::cout << "Renderer could not be created: " << SDL_GetError() << std::endl;
+        return false;
+    }
+    std::cout << "Renderer created" << std::endl;
+    SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 
-	SDL_SetRenderDrawColor(gRenderer, 255, 175, 222, 0xFF);
-	SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderScale(gRenderer, RESOLUTION_SCALE, RESOLUTION_SCALE);
+    SDL_SetWindowSize(gWindow, RELATIVE_SCREEN_WIDTH * RESOLUTION_SCALE,  RELATIVE_SCREEN_HEIGHT * RESOLUTION_SCALE);
 
-	SDL_SetRenderScale(gRenderer, RESOLUTION_SCALE, RESOLUTION_SCALE);
-	SDL_SetWindowSize(gWindow, RELATIVE_SCREEN_WIDTH * RESOLUTION_SCALE,  RELATIVE_SCREEN_HEIGHT * RESOLUTION_SCALE);
 
 	return true;
 }
@@ -68,6 +72,12 @@ void Close()
 
 
 int main(int argc, char* args[]){
+    if(argc <= 1) {
+        std::cout << "Error, no ROM specified (include the path to ROM in launch) \nClosing...\n";
+        return -1;
+    }
+
+
     int exitCode { 0 };
     testHeader t;
     std::cout << "Launching... with test num " << t.testNum << "\n";
@@ -90,9 +100,11 @@ int main(int argc, char* args[]){
             SDL_PollEvent( &e );
             if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
-            SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
-            SDL_RenderClear(gRenderer);
+            // call updates here
+
+            SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
             SDL_RenderPresent(gRenderer);
+            SDL_RenderClear(gRenderer);
         }
     }
 
