@@ -7,7 +7,7 @@
 #include <SDL3/SDL_main.h>
 
 #include "testHeader.h"
-#include "c8_components.h"
+#include "c8_emulator.h"
 
 // ACE Chip8 Emulator 
 // Brody Watson 2026
@@ -33,19 +33,6 @@ SDL_Renderer* gRenderer { nullptr };
 
 // Check specific memory location for font and print
 // it to see if output is valid
-void CheckFont(uint8_t startAddress, bool includeWhiteSpace) {
-    int _nlc = 0; // count for a new line (scuffed)
-     for(uint8_t i = 0; i < 80; ++i) {
-        std::string line = std::bitset<8>((int)MEMORY[i + startAddress]).to_string();
-        if(!includeWhiteSpace) { line = line.substr(0,4); }
-        std::cout << line << std::endl;
-        _nlc++;
-        if(_nlc == 5) {
-            _nlc = 0;
-            std::cout << std::endl;
-        }
-    }
-}
 
 bool Init() {
 	//initialze sdl
@@ -95,23 +82,17 @@ int main(int argc, char* args[]){
     //     std::cout << "Error, no ROM specified (include the path to ROM in launch) \nClosing...\n";
     //     return -1;
     // }
-    MEMORY[PROGRAM_COUNTER] = 21;
-
-    // uint8_t is treated as character type not number, so it tries to find ascii 21
-    std::cout << (int)MEMORY[PROGRAM_COUNTER] << " " << PROGRAM_COUNTER << std::endl;
-
-    // lets load the font into memory (MOVE TO FUNCTION LATER c8_startup?)
-    for(uint8_t i = 0; i < fontStartAddr; ++i) {
-        // offset memory addr by fontstartAddr where we want to begin.
-        MEMORY[i + fontStartAddr] = FONT[i];
-    }
 
     //check fonts loaded correctly 
-    CheckFont(fontStartAddr, false);
+    //c8_utils utils;
+    //utils.CheckFont(fontStartAddr, false);
+
+    c8_emulator emulator;
+    emulator.Startup();
 
     int exitCode { 0 };
     testHeader t;
-    std::cout << "Launching... with test num " << t.testNum << "\n";
+    std::cout << "Launching... \n";
 
     if(Init() == false) {
         SDL_Log("Unable to init!\n");

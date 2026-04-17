@@ -30,13 +30,14 @@ FetchContent_MakeAvailable(SDL3)
 target_sources(ace
 	PRIVATE
     	src/main.cpp
+		src/c8_emulator.cpp
 
 	PUBLIC 
 		FILE_SET HEADERS
 		BASE_DIRS
 			src/include
 		FILES
-			src/include/c8_components.h
+			src/include/c8_emulator.h
 )
 
 
