@@ -31,7 +31,7 @@ uint8_t V4;
 uint8_t V5;
 uint8_t V6;
 uint8_t V7;
-uint8_t V6;
+uint8_t V8;
 uint8_t V9;
 uint8_t VA;
 uint8_t VB;
@@ -55,7 +55,7 @@ uint8_t VF; // also used as a flag register, many instructions set it to 0 or 1 
 // think of each as a chunk of raw memory
 // starting at 050 and ending at 09f
 // also the size of our array!
-uint8_t fontStart = 80;
+uint8_t fontStartAddr = 80;
 // grabbing char = beginning address * size of char (5 bytes) + start
 
 // we manually write the font here, then load it into memory on startup...

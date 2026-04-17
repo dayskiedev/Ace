@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stack>
+#include <bitset>
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -29,6 +30,23 @@ SDL_Window* gWindow { nullptr };
 SDL_Surface* gScreenSurface { nullptr };
 SDL_Renderer* gRenderer { nullptr };
 
+// Check specific memory location for font and print
+// it to see if output is valid
+void CheckFont(uint8_t startAddress) {
+    // should be 0-15 on outer loop and 0-4 on inner
+    for(uint8_t i = startAddress; i < startAddress + 80; i+=5) {
+
+
+        // offset memory addr by fontstartAddr where we want to begin.
+        // silly scuffed way to do it but it works
+        std::cout << std::bitset<8>((int)MEMORY[i]) << std::endl;
+        std::cout << std::bitset<8>((int)MEMORY[i+1]) << std::endl;
+        std::cout << std::bitset<8>((int)MEMORY[i+2]) << std::endl;
+        std::cout << std::bitset<8>((int)MEMORY[i+3]) << std::endl;
+        std::cout << std::bitset<8>((int)MEMORY[i+4]) << std::endl;
+        std::cout << std::endl;
+    }
+}
 
 bool Init() {
 	//initialze sdl
@@ -83,9 +101,14 @@ int main(int argc, char* args[]){
     // uint8_t is treated as character type not number, so it tries to find ascii 21
     std::cout << (int)MEMORY[PROGRAM_COUNTER] << " " << PROGRAM_COUNTER << std::endl;
 
-    // lets load the font into memory
-    
+    // lets load the font into memory (MOVE TO FUNCTION LATER c8_startup?)
+    for(uint8_t i = 0; i < fontStartAddr; ++i) {
+        // offset memory addr by fontstartAddr where we want to begin.
+        MEMORY[i + fontStartAddr] = FONT[i];
+    }
 
+    //check fonts loaded correctly 
+    CheckFont(fontStartAddr);
 
     int exitCode { 0 };
     testHeader t;
