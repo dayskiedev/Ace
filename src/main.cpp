@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stack>
 #include <bitset>
+#include <string>
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -32,19 +33,17 @@ SDL_Renderer* gRenderer { nullptr };
 
 // Check specific memory location for font and print
 // it to see if output is valid
-void CheckFont(uint8_t startAddress) {
-    // should be 0-15 on outer loop and 0-4 on inner
-    for(uint8_t i = startAddress; i < startAddress + 80; i+=5) {
-
-
-        // offset memory addr by fontstartAddr where we want to begin.
-        // silly scuffed way to do it but it works
-        std::cout << std::bitset<8>((int)MEMORY[i]) << std::endl;
-        std::cout << std::bitset<8>((int)MEMORY[i+1]) << std::endl;
-        std::cout << std::bitset<8>((int)MEMORY[i+2]) << std::endl;
-        std::cout << std::bitset<8>((int)MEMORY[i+3]) << std::endl;
-        std::cout << std::bitset<8>((int)MEMORY[i+4]) << std::endl;
-        std::cout << std::endl;
+void CheckFont(uint8_t startAddress, bool includeWhiteSpace) {
+    int _nlc = 0; // count for a new line (scuffed)
+     for(uint8_t i = 0; i < 80; ++i) {
+        std::string line = std::bitset<8>((int)MEMORY[i + startAddress]).to_string();
+        if(!includeWhiteSpace) { line = line.substr(0,4); }
+        std::cout << line << std::endl;
+        _nlc++;
+        if(_nlc == 5) {
+            _nlc = 0;
+            std::cout << std::endl;
+        }
     }
 }
 
@@ -108,7 +107,7 @@ int main(int argc, char* args[]){
     }
 
     //check fonts loaded correctly 
-    CheckFont(fontStartAddr);
+    CheckFont(fontStartAddr, false);
 
     int exitCode { 0 };
     testHeader t;
