@@ -36,7 +36,7 @@ target_sources(ace
 		BASE_DIRS
 			src/include
 		FILES
-
+			src/include/c8_components.h
 )
 
 
