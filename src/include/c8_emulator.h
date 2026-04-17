@@ -28,6 +28,9 @@ class c8_emulator {
     public:
     void Startup();
 
+    // read-only veiw of memory
+    const uint8_t* PeakMemory() { return MEMORY; }
+
     private:
     uint8_t MEMORY[4096];                   // total virtual memory allocated
     uint16_t PROGRAM_COUNTER = 512;         // starting address in decimal (0x200)

@@ -20,6 +20,7 @@ void c8_emulator::Startup() {
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
 
+    // load font into memory from addr 050 (80)
     for(uint8_t i = 0; i < fontStartAddr; ++i) {
         // offset memory addr by fontstartAddr where we want to begin.
         MEMORY[i + fontStartAddr] = FONT[i];
