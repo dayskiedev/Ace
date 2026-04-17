@@ -1,6 +1,12 @@
 # initial build: cmake -S . -B build
 # then to actually build: cmake --build build
 # then run with ./build/debug/ace.exe
+
+# ensure they have gcc 
+# ensure they have git
+# check sdl3 dll is installed?
+# need to copy dll to path
+
 cmake_minimum_required(VERSION 3.24)
 
 # ensure user has at least this version of c++

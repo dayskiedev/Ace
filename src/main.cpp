@@ -12,43 +12,49 @@
 
 // constexpr evaluates at compile rather than runtime
 // brace init for type safety (?)
-constexpr int ScreenWidth { 500 };
-constexpr int ScreenHeight { 500 }; 
+constexpr int RELATIVE_SCREEN_WIDTH { 32 };
+constexpr int RELATIVE_SCREEN_HEIGHT { 64 }; 
+std::string PROGRAM_NAME { "ACE" };
+
+int RESOLUTION_SCALE { 12 };
 
 SDL_Window* gWindow { nullptr };
 SDL_Surface* gScreenSurface { nullptr };
+SDL_Renderer* gRenderer { nullptr };
 
-bool init()
-{
-    //Initialization flag
-    bool success{ true };
+bool Init() {
+	//initialze sdl
+	if (SDL_Init(SDL_INIT_VIDEO) == false) {
+		std::cout << "SDL could not be initialised!" << std::endl;
+		return false;
+	}
+	std::cout << "SDL initialised" << std::endl;
 
-    //Initialize SDL
-    if( SDL_Init( SDL_INIT_VIDEO ) == false )
-    {
-        SDL_Log( "SDL could not initialize! SDL error: %s\n", SDL_GetError() );
-        success = false;
-    }
-    else
-    {
-        //Create window
-        if( gWindow = SDL_CreateWindow( "SDL3 Tutorial: Hello SDL3", ScreenWidth, ScreenHeight, 0 ); gWindow == nullptr )
-        {
-            SDL_Log( "Window could not be created! SDL error: %s\n", SDL_GetError() );
-            success = false;
-        }
-        else
-        {
-            //Get window surface
-            gScreenSurface = SDL_GetWindowSurface( gWindow );
-        }
-    }
+	// Create window
+	gWindow = SDL_CreateWindow(PROGRAM_NAME.c_str(), RELATIVE_SCREEN_WIDTH, RELATIVE_SCREEN_HEIGHT, 0);
+	if (gWindow == NULL) {
+		std::cout << "Window could not be created!" << std::endl;
+		return false;
+	}
+	std::cout << "Window created" << std::endl;
 
-    return success;
+	// Create Renderer for window
+	gRenderer = SDL_CreateRenderer(gWindow, NULL);
+	if (gRenderer == NULL) {
+		std::cout << "Renderer could not be created: " << SDL_GetError() << std::endl;
+		return false;
+	}
+	std::cout << "Renderer created" << std::endl;
+
+	SDL_SetRenderDrawColor(gRenderer, 255, 175, 222, 0xFF);
+	SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
+
+	SDL_SetRenderScale(gRenderer, RESOLUTION_SCALE, RESOLUTION_SCALE);
+	SDL_SetWindowSize(gWindow, RELATIVE_SCREEN_WIDTH * RESOLUTION_SCALE,  RELATIVE_SCREEN_HEIGHT * RESOLUTION_SCALE);
+
+	return true;
 }
-
-
-void close()
+void Close()
 {
     std::cout << "Exiting...\n";
     //Destroy window
@@ -66,7 +72,7 @@ int main(int argc, char* args[]){
     testHeader t;
     std::cout << "Launching... with test num " << t.testNum << "\n";
 
-    if(init() == false) {
+    if(Init() == false) {
         SDL_Log("Unable to init!\n");
         exitCode = 1;
     } 
@@ -81,27 +87,17 @@ int main(int argc, char* args[]){
         while( quit == false )
         {   
             //Get event data
-            while( SDL_PollEvent( &e ) == true )
-            {
-                //If event is quit type
-                if( e.type == SDL_EVENT_QUIT )
-                {
-                    //End the main loop
-                    quit = true;
-                }
-            }
+            SDL_PollEvent( &e );
+            if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
-            //Fill the surface white
-            SDL_FillSurfaceRect( gScreenSurface, nullptr, SDL_MapSurfaceRGB( gScreenSurface, 0xFF, 0xFF, 0xFF ) );
-
-
-            //Update the surface
-            SDL_UpdateWindowSurface( gWindow );
+            SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+            SDL_RenderClear(gRenderer);
+            SDL_RenderPresent(gRenderer);
         }
     }
 
 
-    close();
+    Close();
 
     return exitCode;
    
