@@ -24,8 +24,29 @@ SDL_Renderer* gRenderer { nullptr };
 
 
 // CHIP8 Specifc
-int PROGRAM_COUNTER; // points to the current instruction in memory (should be a pointer then?)
+// memory is 4096 bytes
+// when we talk about loading/reading memory at 0x200, its local to THIS MEMORY
+// we DONT load into ACTUAL memory, we create an array of VIRTUAL memory and
+// go to it using decimal conversion
 
+// so program counter is an int starting a 0x200 which is actually 512
+
+// int8 is 1 byte, meaning it can store only 0->255 values
+// but this is for EACH int, we have 4096 of them
+// we want it to be 1 byte because each instruction is only 1 byte, and we need to read 2 at a time
+// this stops any accidental skips
+uint8_t MEMORY[4096];           // total virtual memory allocated
+uint16_t PROGRAM_COUNTER = 512; // starting address in decimal (0x200)
+
+// font is written using bits, where 1 is a black pixel and 0 white. Here is an example of 0:
+// 0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+// 4 pixels wide and 5 pixels tall
+// 11110000        1111
+// 10010000        1001
+// 10010000        1001
+// 10010000        1001
+// 11110000        1111
+// as you can we we end up with 0 in binary, and reducing it to be 4x5 we see it cleaer
 
 bool Init() {
 	//initialze sdl
@@ -70,12 +91,15 @@ void Close()
     SDL_Quit();
 }
 
-
 int main(int argc, char* args[]){
-    if(argc <= 1) {
-        std::cout << "Error, no ROM specified (include the path to ROM in launch) \nClosing...\n";
-        return -1;
-    }
+    // if(argc <= 1) {
+    //     std::cout << "Error, no ROM specified (include the path to ROM in launch) \nClosing...\n";
+    //     return -1;
+    // }
+    MEMORY[PROGRAM_COUNTER] = 21;
+
+    // uint8_t is treated as character type not number, so it tries to find ascii 21
+    std::cout << (int)MEMORY[PROGRAM_COUNTER] << " " << PROGRAM_COUNTER << std::endl;
 
 
     int exitCode { 0 };
