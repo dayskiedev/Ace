@@ -83,6 +83,9 @@ int main(int argc, char* args[]){
     // uint8_t is treated as character type not number, so it tries to find ascii 21
     std::cout << (int)MEMORY[PROGRAM_COUNTER] << " " << PROGRAM_COUNTER << std::endl;
 
+    // lets load the font into memory
+    
+
 
     int exitCode { 0 };
     testHeader t;
