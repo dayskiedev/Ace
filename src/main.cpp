@@ -105,7 +105,7 @@ int main(int argc, char* args[]){
     // IBM end addr  -> 0x284
     // Pong end addr -> 0x308
     // note: actual values are stored as uint8_t but printed as hex
-    utils.CheckMemory(emulator.GetMemory(), 0x200, 0x284);
+    utils.CheckMemory(emulator.GetMemory(), emulator.GetStartAddr(), emulator.GetRomSize() + emulator.GetStartAddr());
 
     int exitCode { 0 };
     std::cout << "Launching... \n";

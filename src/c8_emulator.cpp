@@ -43,6 +43,7 @@ bool c8_emulator::Startup(std::string path_to_rom) {
         rom.close();
 
         std::cout << "ROM is " << size << " bytes\n";
+        romSize = size;
         // now that we have the rom loaded into the buffer, we move it to memory
         for(int i = 0; i < size; ++i) {
             MEMORY[START_ADR + i] = buffer[i];
