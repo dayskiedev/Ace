@@ -23,7 +23,7 @@
 // brace init for type safety (?)
 constexpr int RELATIVE_SCREEN_WIDTH { 320 };
 constexpr int RELATIVE_SCREEN_HEIGHT { 640 }; 
-std::string PROGRAM_NAME { "ACE" };
+std::string PROGRAM_NAME { "Ace" };
 
 int RESOLUTION_SCALE { 1 };
 
@@ -129,6 +129,8 @@ int main(int argc, char* args[]){
             if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
             // call updates here
+            // pass through renderer to update screen?
+            emulator.Run();
 
             SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
             SDL_RenderPresent(gRenderer);

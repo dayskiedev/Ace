@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stack>
 #include <fstream>
+#include <iomanip>
 
 // right now we get duplicate linker errors because this file is duplicated accross 
 // multiple instances
@@ -28,6 +29,9 @@
 class c8_emulator {
     public:
     bool Startup(std::string path_to_rom);
+
+    // should limit to 60hz to match timer coundown?
+    void Run();
 
     // read-only veiw of all memory
     const uint8_t* GetMemory() { return MEMORY; }

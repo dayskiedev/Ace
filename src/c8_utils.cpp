@@ -20,6 +20,7 @@ void c8_utils::CheckFont(const uint8_t  CONST_MEMORY[], uint8_t startAddress, bo
 void c8_utils::CheckMemory(const uint8_t CONST_MEMORY[], int startAddress, int endAddresss) {
     // uint8_t is 0 but int is 512?
 
+    // move this to its own hex print function? really this could replace check font....
     int cols = 8;
     int spacing = 0;
     int count = 0;

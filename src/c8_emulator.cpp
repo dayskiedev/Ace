@@ -34,6 +34,7 @@ bool c8_emulator::Startup(std::string path_to_rom) {
     std::cout << "Attempting to load ROM...\n";
     char* buffer;
     std::ifstream::pos_type size;
+    // open to the end of the file, specifying its a binary file
     std::ifstream rom (path_to_rom,std::ios::binary | std::ios::ate);
     if(rom.is_open()) {
         size = rom.tellg();
@@ -61,4 +62,29 @@ bool c8_emulator::Startup(std::string path_to_rom) {
     PROGRAM_COUNTER = START_ADR;
 
     return true;
+}
+
+void c8_emulator::Run() {
+
+    // program counter points to current program instruction
+    // address pointer can point to anywhere in memory?
+
+    // fetch 
+    // i saw some weird trick to combine the bits...
+    uint8_t opcode = MEMORY[PROGRAM_COUNTER];
+
+    // decode
+
+    std::cout << std::hex << (int)opcode << std::endl;
+
+    // execute
+    // aka have a big switch statement here.
+
+
+    // increment (by 2!)
+    //PROGRAM_COUNTER += 2;
+
+    // repeat forever..
+
+    // (if program counter goes over our rom size, we can assume we are out of bounds and generate an error?)
 }
