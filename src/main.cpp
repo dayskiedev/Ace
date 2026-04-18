@@ -92,9 +92,20 @@ int main(int argc, char* args[]){
     c8_utils utils;
 
     std::string path_to_rom = "roms/IBM Logo.ch8";
-    emulator.Startup(path_to_rom);
+    if(!emulator.Startup(path_to_rom)) {
+        std::cout << "Error loading emulator, unable to launch.";
+        return -1;
+    }
 
     //utils.CheckFont(emulator.GetMemory(), 80, false);
+    
+    // 0x50 -> fonts loaded from here
+    // 0x200 -> rom loaded here
+
+    // IBM end addr  -> 0x284
+    // Pong end addr -> 0x308
+    // note: actual values are stored as uint8_t but printed as hex
+    utils.CheckMemory(emulator.GetMemory(), 0x200, 0x284);
 
     int exitCode { 0 };
     std::cout << "Launching... \n";

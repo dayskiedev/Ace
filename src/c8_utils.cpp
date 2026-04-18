@@ -16,3 +16,29 @@ void c8_utils::CheckFont(const uint8_t  CONST_MEMORY[], uint8_t startAddress, bo
         }
     }
 };
+
+void c8_utils::CheckMemory(const uint8_t CONST_MEMORY[], int startAddress, int endAddresss) {
+    // uint8_t is 0 but int is 512?
+
+    int cols = 8;
+    int spacing = 0;
+    int count = 0;
+    for(int i = startAddress; i < endAddresss; i++) {
+        count++;
+        spacing++;
+        std::cout << std::setw(2) 
+                  << std::hex 
+                  << std::setfill('0') 
+                  << (int)CONST_MEMORY[i];
+
+        if(spacing == 2) {
+            std::cout << " ";
+            spacing = 0;
+        }
+        if(count == cols) {
+            std::cout << std::endl;
+            count = 0;
+        }
+    }
+    std::cout << std::endl;
+}

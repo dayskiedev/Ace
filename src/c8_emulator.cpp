@@ -1,6 +1,7 @@
 #include "c8_emulator.h"
 
 bool c8_emulator::Startup(std::string path_to_rom) {
+    // define the font we will use
     uint8_t FONT[] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
         0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -41,13 +42,22 @@ bool c8_emulator::Startup(std::string path_to_rom) {
         rom.read(buffer, size);
         rom.close();
 
+        std::cout << "ROM is " << size << " bytes\n";
         // now that we have the rom loaded into the buffer, we move it to memory
         for(int i = 0; i < size; ++i) {
             MEMORY[START_ADR + i] = buffer[i];
+            //std::cout << (int)MEMORY[START_ADR + i] << std::endl;
         }        
         
         delete[] buffer;
-    };
+    } else {
+        std::cout << "Unable to load ROM...\n";
+        return false;
+    }
+
+
+    // set PC to inital start point
+    PROGRAM_COUNTER = START_ADR;
 
     return true;
 }

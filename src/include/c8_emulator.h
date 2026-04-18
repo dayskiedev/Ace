@@ -34,7 +34,7 @@ class c8_emulator {
 
     private:
     uint8_t MEMORY[4096];                   // total virtual memory allocated
-    uint16_t PROGRAM_COUNTER = {512};       // starting address in decimal (0x200)
+    uint16_t PROGRAM_COUNTER = {0};       // starting address in decimal (0x200)
     uint16_t INDEX_REGISTER = {0};          // points to a location in memory
     std::stack<uint16_t> ADDRESS_STACK;     // used to call subroutines/functions
     uint8_t DELAY_TIMER {0};                // decrements at 60hz until 0
@@ -58,7 +58,7 @@ class c8_emulator {
     // think of each as a chunk of raw memory
     // starting at 050 and ending at 09f
     // also the size of our array!
-    uint8_t fontStartAddr = 80;
+    uint8_t fontStartAddr = 0x50;
     // grabbing char = beginning address * size of char (5 bytes) + start
 
     // we manually write the font here, then load it into memory on startup...
