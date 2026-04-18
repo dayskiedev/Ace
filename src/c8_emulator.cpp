@@ -1,6 +1,6 @@
 #include "c8_emulator.h"
 
-void c8_emulator::Startup() {
+bool c8_emulator::Startup(std::string path_to_rom) {
     uint8_t FONT[] = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
         0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -25,4 +25,29 @@ void c8_emulator::Startup() {
         // offset memory addr by fontstartAddr where we want to begin.
         MEMORY[i + fontStartAddr] = FONT[i];
     }
+
+    // next we attempt to load a rom from the specified path
+    std::cout << "Input path: " << path_to_rom << std::endl;
+    const unsigned int START_ADR = 0x200;
+
+    std::cout << "Attempting to load ROM...\n";
+    char* buffer;
+    std::ifstream::pos_type size;
+    std::ifstream rom (path_to_rom,std::ios::binary | std::ios::ate);
+    if(rom.is_open()) {
+        size = rom.tellg();
+        buffer = new char [size];
+        rom.seekg(0, std::ios::beg);
+        rom.read(buffer, size);
+        rom.close();
+
+        // now that we have the rom loaded into the buffer, we move it to memory
+        for(int i = 0; i < size; ++i) {
+            MEMORY[START_ADR + i] = buffer[i];
+        }        
+        
+        delete[] buffer;
+    };
+
+    return true;
 }

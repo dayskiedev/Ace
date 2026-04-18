@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stack>
+#include <fstream>
 
 // right now we get duplicate linker errors because this file is duplicated accross 
 // multiple instances
@@ -26,7 +27,7 @@
 
 class c8_emulator {
     public:
-    void Startup();
+    bool Startup(std::string path_to_rom);
 
     // read-only veiw of all memory
     const uint8_t* GetMemory() { return MEMORY; }
@@ -40,22 +41,7 @@ class c8_emulator {
     uint8_t SOUND_TIMER {0};                // does the same thing but beeps when not 0
 
     // general purpose registers
-    uint8_t V0;
-    uint8_t V1;
-    uint8_t V2;
-    uint8_t V3;
-    uint8_t V4;
-    uint8_t V5;
-    uint8_t V6;
-    uint8_t V7;
-    uint8_t V8;
-    uint8_t V9;
-    uint8_t VA;
-    uint8_t VB;
-    uint8_t VC;
-    uint8_t VD;
-    uint8_t VE;
-    uint8_t VF; // also used as a flag register, many instructions set it to 0 or 1 based on some rules
+    uint8_t REGISTERS[16]{};
 
     // font is written using bits, where 1 is a black pixel and 0 white. Here is an example of 0:
     // 0xF0, 0x90, 0x90, 0x90, 0xF0, // 0

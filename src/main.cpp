@@ -6,7 +6,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include "testHeader.h"
 #include "c8_emulator.h"
 #include "c8_utils.h"
 
@@ -88,14 +87,16 @@ int main(int argc, char* args[]){
     //c8_utils utils;
     //utils.CheckFont(fontStartAddr, false);
 
+    // lives only in these brackets, which is fine
     c8_emulator emulator;
-    emulator.Startup();
-
     c8_utils utils;
-    utils.CheckFont(emulator.GetMemory(), 80, false);
+
+    std::string path_to_rom = "roms/IBM Logo.ch8";
+    emulator.Startup(path_to_rom);
+
+    //utils.CheckFont(emulator.GetMemory(), 80, false);
 
     int exitCode { 0 };
-    testHeader t;
     std::cout << "Launching... \n";
 
     if(Init() == false) {
