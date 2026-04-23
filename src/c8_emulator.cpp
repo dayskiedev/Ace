@@ -77,19 +77,36 @@ bool c8_emulator::Startup(std::string path_to_rom) {
 
 
 
-void c8_emulator::Run() {
+void c8_emulator::Cycle() {
 
     // have some sort of stepper function so we can pause/resume a program
 
-    // fetch 
-    // i saw some weird trick to combine the bits...
-    uint16_t opcode = MEMORY[PROGRAM_COUNTER];
-    std::cout << std::hex << "0x" << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode 
-    opcode <<= 8; // shift 8 bits left
-    std::cout << "0x" << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode 
-    opcode |= MEMORY[PROGRAM_COUNTER+1];
-    std::cout << "0x" << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode 
 
+    // fetch
+    uint16_t opcode = MEMORY[PROGRAM_COUNTER];
+
+    // we start by assigning opcode the first byte
+    // its stored in a 16bit variable, so we grab the memory value at 512 
+    // which in ibm is: 00 or in binary 00000000
+    // note that when starting out, our opcode is empty: 000000000000
+    // this is so we can fit two bytes in, which is why we shift by 8 bits
+    // although in this case it will still be 0
+    // opcode: 0000000000000000
+    // then we increment the program counter by 1 reading the next piece of memory:
+    // e0 which is 11100000
+    // note that if we just set the opcode to this, it would overwrite our previous value
+    // and come out like 0000000011100000 (which i mean matches, but again not the point)
+    // so instead we perfrom an OR bitwise operation, which turns any matching 1's from the opcode
+    // into 1's that match the resulting value in e0. this leaves us with a 16 bit opcode of:
+    // 00000000000011100000 or 00e0 which we can do with as we pleases
+
+    //std::cout << std::hex << "0x" << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode 
+    // move the first half of the opcode over 8 bits to make space for the second half
+    opcode <<= 8;
+    //std::cout << "0x" << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode 
+    // to combine both bytes, we use a bitwise OR (this makes it so any 1's are carried between both bytes)
+    opcode |= MEMORY[PROGRAM_COUNTER+1];
+    std::cout << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode 
     // move 2 spaces in memory (since we take in two bytes for each opcode)
     PROGRAM_COUNTER+=2;
 

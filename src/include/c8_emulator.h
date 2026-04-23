@@ -31,7 +31,7 @@ class c8_emulator {
     bool Startup(std::string path_to_rom);
 
     // should limit to 60hz to match timer coundown?
-    void Run();
+    void Cycle();
 
     // read-only veiw of all memory
     const uint8_t* GetMemory() { return MEMORY; }

@@ -93,9 +93,10 @@ int main(int argc, char* args[]){
         std::cout << "Error loading emulator, unable to launch.";
         return -1;
     }
-
-    emulator.Run();
-    emulator.Run();
+    int cycles = 4;
+    for(int i = 0; i < cycles; ++i) {
+        emulator.Cycle();
+    }
     //utils.CheckFont(emulator.GetMemory(), 80, false);
     
     // 0x50 -> fonts loaded from here
