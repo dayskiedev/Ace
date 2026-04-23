@@ -21,14 +21,13 @@
 
 // constexpr evaluates at compile rather than runtime
 // brace init for type safety (?)
-constexpr int RELATIVE_SCREEN_WIDTH { 320 };
-constexpr int RELATIVE_SCREEN_HEIGHT { 640 }; 
+constexpr int SCREEN_WIDTH { 32 };
+constexpr int SCREEN_HEIGHT { 64 }; 
 std::string PROGRAM_NAME { "Ace" };
 
-int RESOLUTION_SCALE { 1 };
+int SCREEN_SCALE { 10 };
 
 SDL_Window* gWindow { nullptr };
-SDL_Surface* gScreenSurface { nullptr };
 SDL_Renderer* gRenderer { nullptr };
 
 // Check specific memory location for font and print
@@ -43,7 +42,7 @@ bool Init() {
 	std::cout << "SDL initialised" << std::endl;
 
     // Create window
-    gWindow = SDL_CreateWindow(PROGRAM_NAME.c_str(), RELATIVE_SCREEN_WIDTH, RELATIVE_SCREEN_HEIGHT, 0);
+    gWindow = SDL_CreateWindow(PROGRAM_NAME.c_str(), SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     if (gWindow == NULL) {
         std::cout << "Window could not be created!" << std::endl;
         return false;
@@ -59,8 +58,8 @@ bool Init() {
     std::cout << "Renderer created" << std::endl;
     SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 
-    SDL_SetRenderScale(gRenderer, RESOLUTION_SCALE, RESOLUTION_SCALE);
-    SDL_SetWindowSize(gWindow, RELATIVE_SCREEN_WIDTH * RESOLUTION_SCALE,  RELATIVE_SCREEN_HEIGHT * RESOLUTION_SCALE);
+    SDL_SetRenderScale(gRenderer, SCREEN_SCALE, SCREEN_SCALE);
+    SDL_SetWindowSize(gWindow, SCREEN_WIDTH * SCREEN_SCALE,  SCREEN_HEIGHT * SCREEN_SCALE);
 
 
 	return true;
@@ -71,8 +70,6 @@ void Close()
     //Destroy window
     SDL_DestroyWindow( gWindow );
     gWindow = nullptr;
-    gScreenSurface = nullptr;
-
     //Quit SDL subsystems
     SDL_Quit();
 }
@@ -97,6 +94,8 @@ int main(int argc, char* args[]){
         return -1;
     }
 
+    emulator.Run();
+    emulator.Run();
     //utils.CheckFont(emulator.GetMemory(), 80, false);
     
     // 0x50 -> fonts loaded from here
@@ -105,7 +104,7 @@ int main(int argc, char* args[]){
     // IBM end addr  -> 0x284
     // Pong end addr -> 0x308
     // note: actual values are stored as uint8_t but printed as hex
-    utils.CheckMemory(emulator.GetMemory(), emulator.GetStartAddr(), emulator.GetRomSize() + emulator.GetStartAddr());
+    //utils.CheckMemory(emulator.GetMemory(), emulator.GetStartAddr(), emulator.GetRomSize() + emulator.GetStartAddr());
 
     int exitCode { 0 };
     std::cout << "Launching... \n";
@@ -130,7 +129,6 @@ int main(int argc, char* args[]){
 
             // call updates here
             // pass through renderer to update screen?
-            emulator.Run();
 
             SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
             SDL_RenderPresent(gRenderer);
