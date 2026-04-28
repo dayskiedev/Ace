@@ -39,20 +39,20 @@ class c8_emulator {
     // read-only veiw of all memory
     const uint8_t* GetMemory() { return MEMORY; }
     const int GetRomSize() { return romSize; }
-    const int GetStartAddr() { return 0x200; }
+    const int GetStartAddr() { return START_ADR; }
 
     private:
     uint8_t MEMORY[4096];                    // total virtual memory allocated
+    uint16_t START_ADR = 0x200;
     uint16_t PROGRAM_COUNTER = {0};          // starting address in decimal (0x200)
     uint16_t INDEX_REGISTER = {0};           // points to a location in memory
     std::stack<uint16_t> ADDRESS_STACK;      // used to call subroutines/functions
     uint8_t DELAY_TIMER {0};                 // decrements at 60hz until 0
     uint8_t SOUND_TIMER {0};                 // does the same thing but beeps when not 0
-
     uint8_t REGISTERS[16]{};                 // general purpose registers
+    
     // Debug info
     int romSize{};
-    // grabbing char = beginning address * size of char (5 bytes) + start
     
 };
 

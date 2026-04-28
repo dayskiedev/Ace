@@ -9,7 +9,6 @@ bool c8_emulator::Startup(std::string path_to_rom) {
 
     // next we attempt to load a rom from the specified path
     std::cout << "Input path: " << path_to_rom << std::endl;
-    const unsigned int START_ADR = 0x200;
 
     std::cout << "Attempting to load ROM...\n";
     char* buffer;
@@ -47,7 +46,7 @@ bool c8_emulator::Startup(std::string path_to_rom) {
 void c8_emulator::Cycle() {
     // [fetch]
     uint16_t opcode = MEMORY[PROGRAM_COUNTER];
-    
+
     // [decode]
     opcode <<= 8;
     opcode |= MEMORY[PROGRAM_COUNTER+1];
@@ -88,17 +87,24 @@ void c8_emulator::Cycle() {
         break;
 
     case 0x1:
+        // we should not be incrementing the pc counter after this jump
         std::cout << "Jump to " << n2+n3+n4 << std::endl;
         break;
+    case 0x3:
+        std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << std::endl;
+        break;
     case 0x6:
-        // WE SHOULD NOT BE SUMMING THESE, PLACE THEM TOGETHER...
         std::cout << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
+        INDEX_REGISTER = NN;
         break;
     case 0x7:
         std::cout << "Add value " << std::hex << NN << std::dec << " to register V" << n2 << "\n";
         break;
     case 0xA:
         std::cout  << "Set index register I to " << std::hex << NNN << std::dec << "\n";
+        break;
+    case 0xC:
+        std::cout << "Generate a random number, AND it with NN and place in register VX\n";
         break;
     case 0xD:
         std::cout << "Display/Draw\n";
