@@ -10,26 +10,6 @@
 
 #include "c8_font.h"
 
-// right now we get duplicate linker errors because this file is duplicated accross 
-// multiple instances
-// we need to move the definitions into a cpp file
-// c8_emulator.cpp? and define them there
-
-// CHIP8 Specifc
-// memory is 4096 bytes
-// when we talk about loading/reading memory at 0x200, its local to THIS MEMORY
-// we DONT load into ACTUAL memory, we create an array of VIRTUAL memory and
-// go to it using decimal conversion
-
-// so program counter is an int starting a 0x200 which is actually 512
-
-// int8 is 1 byte, meaning it can store only 0->255 values
-// but this is for EACH int, we have 4096 of them
-// we want it to be 1 byte because each instruction is only 1 byte, and we need to read 2 at a time
-// this stops any accidental skips
-
-// the _t ensures we have the same size across multiple systems
-
 #define PIXEL_ON 0xFFFFFFFF
 #define PIXEL_OFF 0x00000000
 

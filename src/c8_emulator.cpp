@@ -55,13 +55,6 @@ void c8_emulator::Cycle() {
     // [decode]
     opcode <<= 8;
     opcode |= MEMORY[PROGRAM_COUNTER+1];
-    //std::cout << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode
-    // 1111000000000000 to get first 4 bits for instruction
-
-    // uint8 treated as char when printing, no real reason to force an 8 bit
-    // 0xF000 == 1111000000000000
-    // >> 12 makes it 0000000000001111
-
     // n1 = first nibbles
     uint16_t n1 = ((opcode & 0xF000) >> 12);
     //std::cout << std::hex << firstNibble << std::endl;
@@ -84,7 +77,7 @@ void c8_emulator::Cycle() {
         switch (opcode) {
         case 0x00E0:
             std::cout << "Clear screen\n";
-            std::fill(VIDEO, VIDEO+1000, PIXEL_ON);
+            std::fill(VIDEO, VIDEO+((64*32)/2), PIXEL_ON);
             break;
         default:
             std::cout << "Unknown 0 type nibble...\n";
