@@ -94,6 +94,9 @@ int main(int argc, char* args[]){
         return -1;
     }
     int cycles = 4;
+
+    bool cycle = false;
+
     for(int i = 0; i < cycles; ++i) {
         emulator.Cycle();
     }
@@ -130,6 +133,19 @@ int main(int argc, char* args[]){
 
             // call updates here
             // pass through renderer to update screen?
+
+            if(e.type == SDL_EVENT_KEY_DOWN) {
+                if(e.key.key == SDLK_C) {
+                    if(cycle = true) {
+                        emulator.Cycle();
+                        cycle = false;
+                    }
+                }
+            } else if(e.type == SDL_EVENT_KEY_UP) {
+                if(e.key.key == SDLK_C) {
+                    cycle = true;
+                }
+            }
 
             SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
             SDL_RenderPresent(gRenderer);

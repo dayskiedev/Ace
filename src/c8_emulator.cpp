@@ -110,9 +110,48 @@ void c8_emulator::Cycle() {
     // 0xF000 == 1111000000000000
     // >> 12 makes it 0000000000001111
 
-    // fN = first nibbles
-    uint16_t fN = ((opcode & 0xF000) >> 12);
-    std::cout << std::hex << fN << std::endl;
-    //execute       
+    // n1 = first nibbles
+    uint16_t n1 = ((opcode & 0xF000) >> 12);
+    //std::cout << std::hex << firstNibble << std::endl;
+    uint16_t n2 = ((opcode & 0x0F00) >> 8);
+    uint16_t n3 = ((opcode & 0x00F0) >> 4);
+    uint16_t n4 = (opcode & 0x000F);
+
+
+    //std::cout << n1 << "|" << n2 << "|" << n3 << "|" << n4 << std::endl;
+    std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";    // decode
+    // execute  
+    switch (n1) {
+    case 0x0:
+        switch (opcode) {
+        case 0x00E0:
+            std::cout << "Clear screen\n";
+            break;
+        default:
+            std::cout << "Unknown 0 type nibble...\n";
+            break;
+        }
+        break;
+
+    case 0x1:
+        std::cout << "Jump to " << n2+n3+n4 << std::endl;
+        break;
+    case 0x6:
+        std::cout << "Set register V" << n2 << " to " << n3 + n4 << "\n";
+        break;
+    case 0x7:
+        std::cout << "Add value " << n3+n4 << " to register V" << n2 << "\n";
+        break;
+    case 0xA:
+        std::cout  << "Set index register I to " << n2 + n3 + n4 << "\n";
+        break;
+    case 0xD:
+        std::cout << "Display/Draw\n";
+        break;
+    default:
+        std::cout << "Unknown Nibble... \n";
+        break;
+    }
+       
     PROGRAM_COUNTER+=2; 
 }
