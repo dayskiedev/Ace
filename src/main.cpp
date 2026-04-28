@@ -41,8 +41,8 @@ bool Init() {
 	}
 	std::cout << "SDL initialised" << std::endl;
 
-    // Create window
-    gWindow = SDL_CreateWindow(PROGRAM_NAME.c_str(), SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    // Create window (suggess using create window and renderer to avoid flicker?)
+    gWindow = SDL_CreateWindow(PROGRAM_NAME.c_str(), SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_VULKAN);
     if (gWindow == NULL) {
         std::cout << "Window could not be created!" << std::endl;
         return false;
@@ -80,6 +80,12 @@ int main(int argc, char* args[]){
     //     return -1;
     // }
 
+    // setup SDL
+    if(Init() == false) {
+        SDL_Log("Unable to init!\n");
+        return -1;
+    } 
+    
     c8_emulator emulator;
     c8_utils utils;
 
@@ -93,45 +99,38 @@ int main(int argc, char* args[]){
     int exitCode { 0 };
     std::cout << "Launching... \n";
 
-    if(Init() == false) {
-        SDL_Log("Unable to init!\n");
-        exitCode = 1;
-    } 
+    bool quit { false }; 
+    SDL_Event e;
+    SDL_zero( e );
 
-    else {
-        bool quit { false }; 
+        //The main loop
+    while( quit == false )
+    {   
+        //Get event data
+        SDL_PollEvent( &e );
+        if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
-        SDL_Event e;
-        SDL_zero( e );
+        // call updates here
+        // pass through renderer to update screen?
 
-         //The main loop
-        while( quit == false )
-        {   
-            //Get event data
-            SDL_PollEvent( &e );
-            if( e.type == SDL_EVENT_QUIT ) { quit = true; }
-
-            // call updates here
-            // pass through renderer to update screen?
-
-            if(e.type == SDL_EVENT_KEY_DOWN) {
-                if(e.key.key == SDLK_C) {
-                    if(cycle = true) {
-                        emulator.Cycle();
-                        cycle = false;
-                    }
-                }
-            } else if(e.type == SDL_EVENT_KEY_UP) {
-                if(e.key.key == SDLK_C) {
-                    cycle = true;
+        if(e.type == SDL_EVENT_KEY_DOWN) {
+            if(e.key.key == SDLK_C) {
+                if(cycle = true) {
+                    emulator.Cycle();
+                    cycle = false;
                 }
             }
-
-            SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-            SDL_RenderPresent(gRenderer);
-            SDL_RenderClear(gRenderer);
+        } else if(e.type == SDL_EVENT_KEY_UP) {
+            if(e.key.key == SDLK_C) {
+                cycle = true;
+            }
         }
+
+        SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+        SDL_RenderPresent(gRenderer);
+        SDL_RenderClear(gRenderer);
     }
+
 
 
     Close();

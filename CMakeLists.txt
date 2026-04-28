@@ -26,6 +26,15 @@ FetchContent_Declare(
 # check if the user has SDL3 installed, if not we want to include it.
 FetchContent_MakeAvailable(SDL3)
 
+# FetchContent_Declare(
+# 	IMGUI
+# 	GIT_REPOSITORY https://github.com/ocornut/imgui.git  	# source for imgui we are using
+#    	GIT_TAG dac07199cfd761113d966eb8ad739254e10df2fe		# release 1.92.7 (stick to release, dont want the latest each time)
+#    	OVERRIDE_FIND_PACKAGE  								    # ensure this fetchcontent has first been called
+# )
+
+# FetchContent_MakeAvailable(IMGUI)
+
 # get project files
 target_sources(ace
 	PRIVATE
@@ -43,5 +52,5 @@ target_sources(ace
 )
 
 
-# link SDL3
+# link SDL3 (SDL3 provides a Cmake target, imgui doesnt)
 target_link_libraries(ace PRIVATE SDL3::SDL3)
