@@ -80,11 +80,6 @@ int main(int argc, char* args[]){
     //     return -1;
     // }
 
-    //check fonts loaded correctly 
-    //c8_utils utils;
-    //utils.CheckFont(fontStartAddr, false);
-
-    // lives only in these brackets, which is fine
     c8_emulator emulator;
     c8_utils utils;
 
@@ -93,23 +88,8 @@ int main(int argc, char* args[]){
         std::cout << "Error loading emulator, unable to launch.";
         return -1;
     }
-    int cycles = 4;
 
     bool cycle = false;
-
-    for(int i = 0; i < cycles; ++i) {
-        emulator.Cycle();
-    }
-    //utils.CheckFont(emulator.GetMemory(), 80, false);
-    
-    // 0x50 -> fonts loaded from here
-    // 0x200 -> rom loaded here
-
-    // IBM end addr  -> 0x284
-    // Pong end addr -> 0x308
-    // note: actual values are stored as uint8_t but printed as hex
-    //utils.CheckMemory(emulator.GetMemory(), emulator.GetStartAddr(), emulator.GetRomSize() + emulator.GetStartAddr());
-
     int exitCode { 0 };
     std::cout << "Launching... \n";
 

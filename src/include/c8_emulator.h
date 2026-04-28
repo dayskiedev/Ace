@@ -5,6 +5,7 @@
 #include <stack>
 #include <fstream>
 #include <iomanip>
+#include <bitset>
 
 // right now we get duplicate linker errors because this file is duplicated accross 
 // multiple instances

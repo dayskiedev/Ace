@@ -57,49 +57,16 @@ bool c8_emulator::Startup(std::string path_to_rom) {
         return false;
     }
 
-
+    std::cout << "Loaded ROM!\n";
     // set PC to inital start point
     PROGRAM_COUNTER = START_ADR;
 
     return true;
 }
 
-// IBM OPCODES (OPCODES NEEDED TO RUN IMB LOGO.CH8):
-
-// 00E0 [CLS]: Clear the display set all pixels to off
-// 1NNN [JMP NNN]: Set PROGRAM_COUNTER to NNN
-// 6XNN [LD, VX, NN]: Load immediate value NN into register VX
-// 7XNN [ADD VX, NN]: Add immediate value NN to register VX. Does not effect VF.
-// ANNN [LD I, NNN]: Set INDEX_REGISTER equal to NNN
-// DXYN [DRW VX, VY, N]: Display N-byte sprite starting at memory location INDEX_REGISTER at 
-//                       (VX, VY). Each set bit of xored with what's already drawn. 
-//                       VF is set to 1 if a collision occurs. 0 otherwise.
-
-
-
 void c8_emulator::Cycle() {
-
-    // have some sort of stepper function so we can pause/resume a program
-
-
     // fetch
     uint16_t opcode = MEMORY[PROGRAM_COUNTER];
-
-    // we start by assigning opcode the first byte
-    // its stored in a 16bit variable, so we grab the memory value at 512 
-    // which in ibm is: 00 or in binary 00000000
-    // note that when starting out, our opcode is empty: 000000000000
-    // this is so we can fit two bytes in, which is why we shift by 8 bits
-    // although in this case it will still be 0
-    // opcode: 0000000000000000
-    // then we increment the program counter by 1 reading the next piece of memory:
-    // e0 which is 11100000
-    // note that if we just set the opcode to this, it would overwrite our previous value
-    // and come out like 0000000011100000 (which i mean matches, but again not the point)
-    // so instead we perfrom an OR bitwise operation, which turns any matching 1's from the opcode
-    // into 1's that match the resulting value in e0. this leaves us with a 16 bit opcode of:
-    // 00000000000011100000 or 00e0 which we can do with as we pleases
-
     // decode
     opcode <<= 8;
     opcode |= MEMORY[PROGRAM_COUNTER+1];
@@ -117,9 +84,13 @@ void c8_emulator::Cycle() {
     uint16_t n3 = ((opcode & 0x00F0) >> 4);
     uint16_t n4 = (opcode & 0x000F);
 
+    // could extract from opcode directly
+    uint16_t N = n4;
+    uint16_t NN = (n3 << 4) | N;
+    uint16_t NNN = (n2 << 8) | NN;
 
     //std::cout << n1 << "|" << n2 << "|" << n3 << "|" << n4 << std::endl;
-    std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";    // decode
+    std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";    
     // execute  
     switch (n1) {
     case 0x0:
@@ -137,13 +108,14 @@ void c8_emulator::Cycle() {
         std::cout << "Jump to " << n2+n3+n4 << std::endl;
         break;
     case 0x6:
-        std::cout << "Set register V" << n2 << " to " << n3 + n4 << "\n";
+        // WE SHOULD NOT BE SUMMING THESE, PLACE THEM TOGETHER...
+        std::cout << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
         break;
     case 0x7:
-        std::cout << "Add value " << n3+n4 << " to register V" << n2 << "\n";
+        std::cout << "Add value " << std::hex << NN << std::dec << " to register V" << n2 << "\n";
         break;
     case 0xA:
-        std::cout  << "Set index register I to " << n2 + n3 + n4 << "\n";
+        std::cout  << "Set index register I to " << std::hex << NNN << std::dec << "\n";
         break;
     case 0xD:
         std::cout << "Display/Draw\n";
