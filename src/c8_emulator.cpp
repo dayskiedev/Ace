@@ -43,7 +43,7 @@ bool c8_emulator::Startup(std::string path_to_rom) {
         rom.read(buffer, size);
         rom.close();
 
-        std::cout << "ROM is " << size << " bytes\n";
+        std::cout << "ROM is " << size << " bytes (" << size/2 << " instructions)\n";
         romSize = size;
         // now that we have the rom loaded into the buffer, we move it to memory
         for(int i = 0; i < size; ++i) {
@@ -59,7 +59,7 @@ bool c8_emulator::Startup(std::string path_to_rom) {
 
 
     // set PC to inital start point
-    PROGRAM_COUNTER = 0x200;
+    PROGRAM_COUNTER = START_ADR;
 
     return true;
 }
@@ -100,15 +100,19 @@ void c8_emulator::Cycle() {
     // into 1's that match the resulting value in e0. this leaves us with a 16 bit opcode of:
     // 00000000000011100000 or 00e0 which we can do with as we pleases
 
-    //std::cout << std::hex << "0x" << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode 
-    // move the first half of the opcode over 8 bits to make space for the second half
+    // decode
     opcode <<= 8;
-    //std::cout << "0x" << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode 
-    // to combine both bytes, we use a bitwise OR (this makes it so any 1's are carried between both bytes)
     opcode |= MEMORY[PROGRAM_COUNTER+1];
-    std::cout << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode 
-    // move 2 spaces in memory (since we take in two bytes for each opcode)
-    PROGRAM_COUNTER+=2;
+    //std::cout << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode
+    // 1111000000000000 to get first 4 bits for instruction
 
-    // execute
+    // uint8 treated as char when printing, no real reason to force an 8 bit
+    // 0xF000 == 1111000000000000
+    // >> 12 makes it 0000000000001111
+
+    // fN = first nibbles
+    uint16_t fN = ((opcode & 0xF000) >> 12);
+    std::cout << std::hex << fN << std::endl;
+    //execute       
+    PROGRAM_COUNTER+=2; 
 }
