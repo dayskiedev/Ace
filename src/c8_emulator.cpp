@@ -1,29 +1,9 @@
 #include "c8_emulator.h"
 
 bool c8_emulator::Startup(std::string path_to_rom) {
-    // define the font we will use
-    uint8_t FONT[] = {
-        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-        0x20, 0x60, 0x20, 0x20, 0x70, // 1
-        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
-    };
-
     // load font into memory from addr 050 (80)
     for(uint8_t i = 0; i < fontStartAddr; ++i) {
-        // offset memory addr by fontstartAddr where we want to begin.
+        // offset memory addr by fontstartAddr value to be where we want to begin.
         MEMORY[i + fontStartAddr] = FONT[i];
     }
 
@@ -65,9 +45,10 @@ bool c8_emulator::Startup(std::string path_to_rom) {
 }
 
 void c8_emulator::Cycle() {
-    // fetch
+    // [fetch]
     uint16_t opcode = MEMORY[PROGRAM_COUNTER];
-    // decode
+    
+    // [decode]
     opcode <<= 8;
     opcode |= MEMORY[PROGRAM_COUNTER+1];
     //std::cout << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::endl;    // decode
@@ -85,13 +66,15 @@ void c8_emulator::Cycle() {
     uint16_t n4 = (opcode & 0x000F);
 
     // could extract from opcode directly
+    // there is uint8_t but it messes with printing, including a couple extra bytes for these wont hurt too much
     uint16_t N = n4;
     uint16_t NN = (n3 << 4) | N;
     uint16_t NNN = (n2 << 8) | NN;
 
     //std::cout << n1 << "|" << n2 << "|" << n3 << "|" << n4 << std::endl;
-    std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";    
-    // execute  
+    std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";   
+    
+    // [execute]
     switch (n1) {
     case 0x0:
         switch (opcode) {

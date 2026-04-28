@@ -38,6 +38,7 @@ target_sources(ace
 			src/include
 		FILES
 			src/include/c8_emulator.h
+			src/include/c8_font.h
 			src/include/c8_utils.h
 )
 

@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <bitset>
 
+#include "c8_font.h"
+
 // right now we get duplicate linker errors because this file is duplicated accross 
 // multiple instances
 // we need to move the definitions into a cpp file
@@ -48,14 +50,9 @@ class c8_emulator {
     uint8_t SOUND_TIMER {0};                 // does the same thing but beeps when not 0
 
     uint8_t REGISTERS[16]{};                 // general purpose registers
-
-    uint8_t fontStartAddr{0x50};
-
     // Debug info
     int romSize{};
     // grabbing char = beginning address * size of char (5 bytes) + start
-
-    // we manually write the font here, then load it into memory on startup...
     
 };
 
