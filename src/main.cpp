@@ -85,11 +85,13 @@ int main(int argc, char* args[]){
         SDL_Log("Unable to init!\n");
         return -1;
     } 
-    
+
     c8_emulator emulator;
     c8_utils utils;
 
-    std::string path_to_rom = "roms/IBM Logo.ch8";
+    std::string rom = "IBM Logo";
+
+    std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
         std::cout << "Error loading emulator, unable to launch.";
         return -1;

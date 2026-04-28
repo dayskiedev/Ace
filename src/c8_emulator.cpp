@@ -47,6 +47,11 @@ void c8_emulator::Cycle() {
     // [fetch]
     uint16_t opcode = MEMORY[PROGRAM_COUNTER];
 
+    if(PROGRAM_COUNTER > START_ADR + romSize) {
+        std::cout << "Outside ROM Memory, terminate program.\n";
+        return;
+    }
+    
     // [decode]
     opcode <<= 8;
     opcode |= MEMORY[PROGRAM_COUNTER+1];
@@ -104,6 +109,7 @@ void c8_emulator::Cycle() {
         std::cout  << "Set index register I to " << std::hex << NNN << std::dec << "\n";
         break;
     case 0xC:
+        // this also may indicate an end of file.
         std::cout << "Generate a random number, AND it with NN and place in register VX\n";
         break;
     case 0xD:
