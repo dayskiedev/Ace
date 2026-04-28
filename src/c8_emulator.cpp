@@ -84,6 +84,7 @@ void c8_emulator::Cycle() {
         switch (opcode) {
         case 0x00E0:
             std::cout << "Clear screen\n";
+            std::fill(VIDEO, VIDEO+1000, PIXEL_ON);
             break;
         default:
             std::cout << "Unknown 0 type nibble...\n";
@@ -93,7 +94,7 @@ void c8_emulator::Cycle() {
 
     case 0x1:
         // we should not be incrementing the pc counter after this jump
-        std::cout << "Jump to " << n2+n3+n4 << std::endl;
+        std::cout << "Jump to " << std::hex << NNN << std::dec << std::endl;
         break;
     case 0x3:
         std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << std::endl;

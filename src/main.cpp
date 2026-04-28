@@ -89,6 +89,13 @@ int main(int argc, char* args[]){
     c8_emulator emulator;
     c8_utils utils;
 
+    // no idea what SDL_PIXELFORMAT_RGBA8888 does...
+    // SDL_TEXTUREACCESS_STREAMING = texture changes constantly (it does)
+    SDL_Texture* videoTexture = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SDL_SetTextureScaleMode(videoTexture, SDL_SCALEMODE_PIXELART);
+    // look into thiss
+    int video_pitch = sizeof(emulator.VIDEO[0]) * SCREEN_WIDTH;
+
     std::string rom = "IBM Logo";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
@@ -117,20 +124,14 @@ int main(int argc, char* args[]){
 
         if(e.type == SDL_EVENT_KEY_DOWN) {
             if(e.key.key == SDLK_C) {
-                if(cycle = true) {
-                    emulator.Cycle();
-                    cycle = false;
-                }
-            }
-        } else if(e.type == SDL_EVENT_KEY_UP) {
-            if(e.key.key == SDLK_C) {
-                cycle = true;
-            }
+                emulator.Cycle();
+            } 
         }
-
-        SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-        SDL_RenderPresent(gRenderer);
         SDL_RenderClear(gRenderer);
+        //SDL_SetRenderDrawColor(gRenderer,0,0,0,0);
+        SDL_UpdateTexture(videoTexture, nullptr, emulator.VIDEO, video_pitch);
+        SDL_RenderTexture(gRenderer, videoTexture, nullptr, nullptr);
+        SDL_RenderPresent(gRenderer);
     }
 
 

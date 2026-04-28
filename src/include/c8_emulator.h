@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <bitset>
+#include <algorithm>
 
 #include "c8_font.h"
 
@@ -29,6 +30,9 @@
 
 // the _t ensures we have the same size across multiple systems
 
+#define PIXEL_ON 0xFFFFFFFF
+#define PIXEL_OFF 0x00000000
+
 class c8_emulator {
     public:
     bool Startup(std::string path_to_rom);
@@ -40,6 +44,10 @@ class c8_emulator {
     const uint8_t* GetMemory() { return MEMORY; }
     const int GetRomSize() { return romSize; }
     const int GetStartAddr() { return START_ADR; }
+
+    // on = 0xFFFFFFFF 
+    // off = 0x00000000
+    uint32_t VIDEO [64 * 32]{};              // screen resolution (use % to handle wrapping )
 
     private:
     uint8_t MEMORY[4096];                    // total virtual memory allocated
