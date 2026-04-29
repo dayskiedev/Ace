@@ -41,6 +41,7 @@ class c8_emulator {
     
     // Debug info
     int romSize{};
+    bool increment = true; // hacky solution so specific instructions can stop the PC from incremeneting
     
 };
 

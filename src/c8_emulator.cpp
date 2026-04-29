@@ -44,6 +44,9 @@ bool c8_emulator::Startup(std::string path_to_rom) {
 }
 
 void c8_emulator::Cycle() {
+    if(!increment) { increment = true; }
+    
+
     // [fetch]
     uint16_t opcode = MEMORY[PROGRAM_COUNTER];
 
@@ -77,7 +80,7 @@ void c8_emulator::Cycle() {
         switch (opcode) {
         case 0x00E0:
             std::cout << "Clear screen\n";
-            std::fill(VIDEO, VIDEO+((64*32)/2), PIXEL_ON);
+            std::fill(VIDEO, VIDEO+((64*32)/2), PIXEL_OFF);
             break;
         default:
             std::cout << "Unknown 0 type nibble...\n";
@@ -87,20 +90,26 @@ void c8_emulator::Cycle() {
 
     case 0x1:
         // we should not be incrementing the pc counter after this jump
-        std::cout << "Jump to " << std::hex << NNN << std::dec << std::endl;
+        std::cout << "Jump to: " << std::hex << NNN <<  std::dec << std::endl;
+        PROGRAM_COUNTER = NNN;
+         // we dont want to increment the counter after jumping, 
+            // note: for the ibm program, this indicates the end of the program, we get into an inf loop
+        increment = false;
         break;
     case 0x3:
         std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << std::endl;
         break;
     case 0x6:
-        std::cout << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
-        INDEX_REGISTER = NN;
+        std::cout << std::hex << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
+        REGISTERS[n2] = NN;
         break;
     case 0x7:
         std::cout << "Add value " << std::hex << NN << std::dec << " to register V" << n2 << "\n";
+        REGISTERS[n2] += NN;
         break;
     case 0xA:
         std::cout  << "Set index register I to " << std::hex << NNN << std::dec << "\n";
+        INDEX_REGISTER = NNN;
         break;
     case 0xC:
         // this also may indicate an end of file.
@@ -108,11 +117,16 @@ void c8_emulator::Cycle() {
         break;
     case 0xD:
         std::cout << "Display/Draw\n";
+
+        
+
         break;
     default:
         std::cout << "Unknown Nibble... \n";
         break;
     }
        
-    PROGRAM_COUNTER+=2; 
+    if(increment) {
+        PROGRAM_COUNTER+=2; 
+    }
 }
