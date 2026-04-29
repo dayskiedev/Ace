@@ -140,7 +140,9 @@ void c8_emulator::Cycle() {
             // 01234567 < the data
             // we need to iterate through it bit by bit
 
-            std::cout << "\nOriginl spriteData: " << std::bitset<8>(spriteData) << "\nBits: ";
+            //if(X >= 64 || Y >= 32) { continue; }
+
+            //std::cout << "\nOriginl spriteData: " << std::bitset<8>(spriteData) << "\nBits: ";
             for(int b = 0; b < 8; ++b) {
                 // slice everything but first bit
                 uint8_t bit = (spriteData & 0x01);
@@ -149,12 +151,28 @@ void c8_emulator::Cycle() {
 
                 spriteData >>= 1; // shift right by 1
 
-                std::cout << std::bitset<1>(bit) << " ";
-                //if(bit == 1) { std::cout << "bit ";} -< int comparision works we know when we have a bit from spritedata
+                //std::cout << std::bitset<1>(bit) << " ";
                 // now we need to compare to whatever is at (X,Y) in array somehow....
+
+                // converting = x + (y * rowLength)
+                // in our case, width = 32
+                int position = X + (Y * 32);
+                std::cout << "Checing bit at (" << (int)X << "," << (int)Y << ") which will be index " << position << "\n";
+                if(bit == 1) {
+                    if(VIDEO[position] == PIXEL_ON) {
+                        VIDEO[position] = PIXEL_OFF;
+                        REGISTERS[15] = 1; // set vf to 1
+                    } else {
+                        VIDEO[position] = PIXEL_ON;
+                    }
+                } 
+
+                X++;
+
             }
             
-            std::cout << std::endl;
+            Y++;
+            //std::cout << std::endl;
 
         }
         
