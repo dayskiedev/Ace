@@ -16,6 +16,7 @@ class c8_utils {
         void CheckMemory(const uint8_t CONST_MEMORY[], uint8_t startAddress);
         void CheckMemory(const uint8_t CONST_MEMORY[], int startAddress, int endAddress);
 
+
 };
 
 #endif

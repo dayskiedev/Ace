@@ -126,6 +126,9 @@ int main(int argc, char* args[]){
             if(e.key.key == SDLK_C) {
                 emulator.Cycle();
             } 
+            else if (e.key.key == SDLK_X) {
+                utils.CheckMemory(emulator.GetMemory(), 0x200, 0x284);
+            }
         }
         SDL_RenderClear(gRenderer);
         //SDL_SetRenderDrawColor(gRenderer,0,0,0,0);

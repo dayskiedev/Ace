@@ -28,6 +28,7 @@ class c8_emulator {
     // on = 0xFFFFFFFF 
     // off = 0x00000000
     uint32_t VIDEO [64 * 32]{};              // screen resolution (use % to handle wrapping )
+    // 1d array 
 
     private:
     uint8_t MEMORY[4096];                    // total virtual memory allocated
@@ -39,6 +40,8 @@ class c8_emulator {
     uint8_t SOUND_TIMER {0};                 // does the same thing but beeps when not 0
     uint8_t REGISTERS[16]{};                 // general purpose registers
     
+
+
     // Debug info
     int romSize{};
     bool increment = true; // hacky solution so specific instructions can stop the PC from incremeneting

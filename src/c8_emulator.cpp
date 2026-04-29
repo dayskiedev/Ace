@@ -46,7 +46,6 @@ bool c8_emulator::Startup(std::string path_to_rom) {
 void c8_emulator::Cycle() {
     if(!increment) { increment = true; }
     
-
     // [fetch]
     uint16_t opcode = MEMORY[PROGRAM_COUNTER];
 
@@ -71,6 +70,10 @@ void c8_emulator::Cycle() {
     uint16_t NN = (n3 << 4) | N;
     uint16_t NNN = (n2 << 8) | NN;
 
+    // Used for draw instruction (probably should not be doing this for EVERY instruction but switch state complains...)
+    uint8_t X = n2 % 64;
+    uint8_t Y = n3 % 32;
+
     //std::cout << n1 << "|" << n2 << "|" << n3 << "|" << n4 << std::endl;
     std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";   
     
@@ -80,7 +83,7 @@ void c8_emulator::Cycle() {
         switch (opcode) {
         case 0x00E0:
             std::cout << "Clear screen\n";
-            std::fill(VIDEO, VIDEO+((64*32)/2), PIXEL_OFF);
+            // std::fill(VIDEO, VIDEO+((64*32)/2), PIXEL_OFF);
             break;
         default:
             std::cout << "Unknown 0 type nibble...\n";
@@ -118,7 +121,46 @@ void c8_emulator::Cycle() {
     case 0xD:
         std::cout << "Display/Draw\n";
 
+        // Draw an N pixels tall sprite from the memory location I points too
+        // at the horizontal coord in vc and the y coordinate in vy all pixels
+        // that are on will be flipped off
+        // if any pixels where turned off by this, the vf flag register is set to 1
+        // otherwise its set to 0
+
+
+
+        // set vf to 0
+        REGISTERS[15] = 0;
+        // we declared N earlier
+
+        // for N rows
+        for(uint16_t i = 0; i < N; ++i) {
+            // get the Nth (ith) byte of sprite data
+            uint8_t spriteData = MEMORY[INDEX_REGISTER + i];
+            // 01234567 < the data
+            // we need to iterate through it bit by bit
+
+            std::cout << "\nOriginl spriteData: " << std::bitset<8>(spriteData) << "\nBits: ";
+            for(int b = 0; b < 8; ++b) {
+                // slice everything but first bit
+                uint8_t bit = (spriteData & 0x01);
+                // convert x and y to a single value inside the 1d array
+                // check that value is/isnt on 
+
+                spriteData >>= 1; // shift right by 1
+
+                std::cout << std::bitset<1>(bit) << " ";
+                //if(bit == 1) { std::cout << "bit ";} -< int comparision works we know when we have a bit from spritedata
+                // now we need to compare to whatever is at (X,Y) in array somehow....
+            }
+            
+            std::cout << std::endl;
+
+        }
         
+        // the starting position of a sprite will warp, but if the sprite drawing
+        // ends up offscreen, that should not be drawn
+
 
         break;
     default:
