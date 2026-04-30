@@ -21,8 +21,8 @@
 
 // constexpr evaluates at compile rather than runtime
 // brace init for type safety (?)
-constexpr int SCREEN_WIDTH { 32 };
-constexpr int SCREEN_HEIGHT { 64 }; 
+constexpr int SCREEN_WIDTH { 64 };
+constexpr int SCREEN_HEIGHT { 32 }; 
 std::string PROGRAM_NAME { "Ace" };
 
 int SCREEN_SCALE { 10 };

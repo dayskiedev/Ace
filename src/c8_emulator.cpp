@@ -101,6 +101,10 @@ void c8_emulator::Cycle() {
         break;
     case 0x3:
         std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << std::endl;
+        if(REGISTERS[n2] == NN) {
+            PROGRAM_COUNTER++;
+        }
+        increment = false;
         break;
     case 0x6:
         std::cout << std::hex << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
@@ -121,43 +125,23 @@ void c8_emulator::Cycle() {
     case 0xD:
         std::cout << "Display/Draw\n";
 
-        // Draw an N pixels tall sprite from the memory location I points too
-        // at the horizontal coord in vc and the y coordinate in vy all pixels
-        // that are on will be flipped off
-        // if any pixels where turned off by this, the vf flag register is set to 1
-        // otherwise its set to 0
-
-
-
-        // set vf to 0
         REGISTERS[15] = 0;
-        // we declared N earlier
 
         // for N rows
         for(uint16_t i = 0; i < N; ++i) {
             // get the Nth (ith) byte of sprite data
             uint8_t spriteData = MEMORY[INDEX_REGISTER + i];
-            // 01234567 < the data
-            // we need to iterate through it bit by bit
+            X = n2 % 64;
 
-            //if(X >= 64 || Y >= 32) { continue; }
-
-            //std::cout << "\nOriginl spriteData: " << std::bitset<8>(spriteData) << "\nBits: ";
+            // for each bit in the current vyte
             for(int b = 0; b < 8; ++b) {
-                // slice everything but first bit
                 uint8_t bit = (spriteData & 0x01);
-                // convert x and y to a single value inside the 1d array
-                // check that value is/isnt on 
-
                 spriteData >>= 1; // shift right by 1
 
-                //std::cout << std::bitset<1>(bit) << " ";
-                // now we need to compare to whatever is at (X,Y) in array somehow....
-
-                // converting = x + (y * rowLength)
-                // in our case, width = 32
-                int position = X + (Y * 32);
+                int position = X + (Y * 64);
                 std::cout << "Checing bit at (" << (int)X << "," << (int)Y << ") which will be index " << position << "\n";
+
+                // check if its on and the corresponding video pixel is on, turn this pizel off if true, otherwise turn it on
                 if(bit == 1) {
                     if(VIDEO[position] == PIXEL_ON) {
                         VIDEO[position] = PIXEL_OFF;
@@ -167,18 +151,12 @@ void c8_emulator::Cycle() {
                     }
                 } 
 
+                //VIDEO[position] = PIXEL_ON;
+
                 X++;
-
             }
-            
             Y++;
-            //std::cout << std::endl;
-
         }
-        
-        // the starting position of a sprite will warp, but if the sprite drawing
-        // ends up offscreen, that should not be drawn
-
 
         break;
     default:
