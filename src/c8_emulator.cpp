@@ -130,22 +130,22 @@ void c8_emulator::Cycle() {
         REGISTERS[15] = 0;
 
         for(uint16_t i = 0; i < N; i++) {
-            //X = n2 % 64;
             uint8_t spriteData = MEMORY[INDEX_REGISTER + i];
             for(int b = 0; b < 8; ++b) {
+                // scroll guard if we reach over 64, we don't want to draw anything (may cause issues...)
+                if(X >= 64) { continue; } 
 
-                if(X >= 64) { continue; } // scroll guard
-                
-                // NEED TO GO FROM MOST TO LEAST SIGNIFICANT
-                // 1001010
-                // 1
-                // 0
-                // 0 ETC
-                uint8_t bit = (spriteData & 0x80);
-                bit >>= 7;
-                std::cout << std::bitset<8>(bit) << std::endl;
+                // get most significant bit from spirteData, move it to first index so its either 1 or 0
+                uint8_t bit = (spriteData & 0x80) >> 7;
+
+                // move next bit to most significant position
                 spriteData <<= 1; // shift left by 1
-                int position = X + (Y * 64);
+
+                // convert 2d coords to 1D array, (Y just tells us the row number to search for where x points to the col)
+                int position = X + (Y * 64); 
+                
+                // probably a better way to do this?
+                // XOR FF = false, TT = false, TF = True, FT = true
                 if(bit == 1) {
                     if(VIDEO[position] == PIXEL_ON) {
                         VIDEO[position] = PIXEL_OFF;
