@@ -102,14 +102,14 @@ void c8_emulator::Cycle() {
     case 0x3:
         std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << std::endl;
         if(REGISTERS[n2] == NN) {
-            PROGRAM_COUNTER++;
+            PROGRAM_COUNTER+=2; // remember an instruction is 2 bytes, so we have to skip twice (could just set increment to true?)
         }
         increment = false;
         break;
     case 0x6:
         std::cout << std::hex << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
         REGISTERS[n2] = NN;
-        std::cout << REGISTERS[n2] << " < val of reg" << std::endl;
+        //std::cout << REGISTERS[n2] << " < val of reg" << std::endl;
         break;
     case 0x7:
         std::cout << "Add value " << std::hex << NN << std::dec << " to register V" << n2 << "\n";
@@ -133,8 +133,18 @@ void c8_emulator::Cycle() {
             //X = n2 % 64;
             uint8_t spriteData = MEMORY[INDEX_REGISTER + i];
             for(int b = 0; b < 8; ++b) {
-                uint8_t bit = (spriteData & 0x01);
-                spriteData >>= 1; // shift right by 1
+
+                if(X >= 64) { continue; } // scroll guard
+                
+                // NEED TO GO FROM MOST TO LEAST SIGNIFICANT
+                // 1001010
+                // 1
+                // 0
+                // 0 ETC
+                uint8_t bit = (spriteData & 0x80);
+                bit >>= 7;
+                std::cout << std::bitset<8>(bit) << std::endl;
+                spriteData <<= 1; // shift left by 1
                 int position = X + (Y * 64);
                 if(bit == 1) {
                     if(VIDEO[position] == PIXEL_ON) {
@@ -148,6 +158,7 @@ void c8_emulator::Cycle() {
             }
             Y++;
             X = REGISTERS[n2] % 64;
+
         }
         break;
     default:
