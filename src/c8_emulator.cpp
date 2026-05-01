@@ -71,8 +71,8 @@ void c8_emulator::Cycle() {
     uint16_t NNN = (n2 << 8) | NN;
 
     // Used for draw instruction (probably should not be doing this for EVERY instruction but switch state complains...)
-    uint8_t X = n2 % 64;
-    uint8_t Y = n3 % 32;
+    uint8_t X;
+    uint8_t Y;
 
     //std::cout << n1 << "|" << n2 << "|" << n3 << "|" << n4 << std::endl;
     std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";   
@@ -83,7 +83,7 @@ void c8_emulator::Cycle() {
         switch (opcode) {
         case 0x00E0:
             std::cout << "Clear screen\n";
-            // std::fill(VIDEO, VIDEO+((64*32)/2), PIXEL_OFF);
+            std::fill(VIDEO, VIDEO+((64*32)), PIXEL_OFF);
             break;
         default:
             std::cout << "Unknown 0 type nibble...\n";
@@ -109,6 +109,7 @@ void c8_emulator::Cycle() {
     case 0x6:
         std::cout << std::hex << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
         REGISTERS[n2] = NN;
+        std::cout << REGISTERS[n2] << " < val of reg" << std::endl;
         break;
     case 0x7:
         std::cout << "Add value " << std::hex << NN << std::dec << " to register V" << n2 << "\n";
@@ -124,24 +125,17 @@ void c8_emulator::Cycle() {
         break;
     case 0xD:
         std::cout << "Display/Draw\n";
-
+        X = REGISTERS[n2] % 64;
+        Y = REGISTERS[n3] % 32;
         REGISTERS[15] = 0;
 
-        // for N rows
-        for(uint16_t i = 0; i < N; ++i) {
-            // get the Nth (ith) byte of sprite data
+        for(uint16_t i = 0; i < N; i++) {
+            //X = n2 % 64;
             uint8_t spriteData = MEMORY[INDEX_REGISTER + i];
-            X = n2 % 64;
-
-            // for each bit in the current vyte
             for(int b = 0; b < 8; ++b) {
                 uint8_t bit = (spriteData & 0x01);
                 spriteData >>= 1; // shift right by 1
-
                 int position = X + (Y * 64);
-                std::cout << "Checing bit at (" << (int)X << "," << (int)Y << ") which will be index " << position << "\n";
-
-                // check if its on and the corresponding video pixel is on, turn this pizel off if true, otherwise turn it on
                 if(bit == 1) {
                     if(VIDEO[position] == PIXEL_ON) {
                         VIDEO[position] = PIXEL_OFF;
@@ -150,14 +144,11 @@ void c8_emulator::Cycle() {
                         VIDEO[position] = PIXEL_ON;
                     }
                 } 
-
-                //VIDEO[position] = PIXEL_ON;
-
                 X++;
             }
             Y++;
+            X = REGISTERS[n2] % 64;
         }
-
         break;
     default:
         std::cout << "Unknown Nibble... \n";
