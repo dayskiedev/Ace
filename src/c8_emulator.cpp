@@ -55,9 +55,9 @@ void c8_emulator::Tick() {
 }
 
 
-void c8_emulator::Cycle() {
-    if(!increment) { increment = true; }
-    
+void c8_emulator::Cycle() {    
+    // timing should be configurable 700 instructions a second should be alright.
+
     // [fetch]
     uint16_t opcode = MEMORY[PROGRAM_COUNTER];
 
@@ -65,10 +65,14 @@ void c8_emulator::Cycle() {
         std::cout << "Outside ROM Memory, terminate program.\n";
         return;
     }
-    
-    // [decode]
+
     opcode <<= 8;
     opcode |= MEMORY[PROGRAM_COUNTER+1];
+
+    // immediatly increment PC to be ready for the next instruction
+    PROGRAM_COUNTER+=2; 
+
+    // [decode]
     // n1 = first nibbles
     uint16_t n1 = ((opcode & 0xF000) >> 12);
     //std::cout << std::hex << firstNibble << std::endl;
@@ -105,7 +109,6 @@ void c8_emulator::Cycle() {
             std::cout << "Pop from top of Address Stack and set PC to its value\n";
             PROGRAM_COUNTER = ADDRESS_STACK.top();
             ADDRESS_STACK.pop();
-            increment = false;
             break;
         }
         break;
@@ -114,23 +117,18 @@ void c8_emulator::Cycle() {
         // we should not be incrementing the pc counter after this jump
         std::cout << "Jump to: " << std::hex << NNN <<  std::dec << std::endl;
         PROGRAM_COUNTER = NNN;
-         // we dont want to increment the counter after jumping, 
-            // note: for the ibm program, this indicates the end of the program, we get into an inf loop
-        increment = false;
         break;
     case 0x2:
         // call subroutine at memory NNN first push current PC tho
         std::cout << "Push current address to ADDRESS_STACK and set PC to  " << std::hex << NNN <<  std::dec << std::endl;
         ADDRESS_STACK.push(PROGRAM_COUNTER);
         PROGRAM_COUNTER = NNN;
-        increment = false;
         break;
     case 0x3:
         std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << std::endl;
         if(REGISTERS[n2] == NN) {
             PROGRAM_COUNTER+=2; // remember an instruction is 2 bytes, so we have to skip twice (could just set increment to true?)
         }
-        //increment = false; it should still increment the other amount?
         break;
     case 0x4:
         // skip if vx != nn
@@ -281,7 +279,4 @@ void c8_emulator::Cycle() {
     }
     
     // should be before we do instruction stuff for some reason?
-    if(increment) {
-        PROGRAM_COUNTER+=2; 
-    }
 }

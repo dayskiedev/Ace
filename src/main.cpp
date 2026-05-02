@@ -123,15 +123,16 @@ int main(int argc, char* args[]){
 
         // call updates here
         // pass through renderer to update screen?
+        emulator.Cycle();
 
-        if(e.type == SDL_EVENT_KEY_DOWN) {
-            if(e.key.key == SDLK_C) {
-                emulator.Cycle();
-            } 
-            else if (e.key.key == SDLK_X) {
-                utils.CheckMemory(emulator.GetMemory(), 0x200, 0x284);
-            }
-        }
+        // if(e.type == SDL_EVENT_KEY_DOWN) {
+        //     if(e.key.key == SDLK_C) {
+        //         emulator.Cycle();
+        //     } 
+        //     else if (e.key.key == SDLK_X) {
+        //         utils.CheckMemory(emulator.GetMemory(), 0x200, 0x284);
+        //     }
+        // }
         SDL_RenderClear(gRenderer);
         //SDL_SetRenderDrawColor(gRenderer,0,0,0,0);
         SDL_UpdateTexture(videoTexture, nullptr, emulator.VIDEO, video_pitch);
