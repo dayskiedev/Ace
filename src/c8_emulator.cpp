@@ -85,8 +85,12 @@ void c8_emulator::Cycle() {
             std::cout << "Clear screen\n";
             std::fill(VIDEO, VIDEO+((64*32)), PIXEL_OFF);
             break;
-        default:
-            std::cout << "Unknown 0 type nibble...\n";
+        case 0x00EE:
+            // pop last address from stack setting PC to it.
+            std::cout << "Pop from top of Address Stack and set PC to its value\n";
+            PROGRAM_COUNTER = ADDRESS_STACK.top();
+            ADDRESS_STACK.pop();
+            increment = false;
             break;
         }
         break;
@@ -99,12 +103,31 @@ void c8_emulator::Cycle() {
             // note: for the ibm program, this indicates the end of the program, we get into an inf loop
         increment = false;
         break;
+    case 0x2:
+        // call subroutine at memory NNN first push current PC tho
+        std::cout << "Push current address to ADDRESS_STACK and set PC to  " << std::hex << NNN <<  std::dec << std::endl;
+        ADDRESS_STACK.push(PROGRAM_COUNTER);
+        PROGRAM_COUNTER = NNN;
+        increment = false;
+        break;
     case 0x3:
         std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << std::endl;
         if(REGISTERS[n2] == NN) {
             PROGRAM_COUNTER+=2; // remember an instruction is 2 bytes, so we have to skip twice (could just set increment to true?)
         }
-        increment = false;
+        //increment = false; it should still increment the other amount?
+        break;
+    case 0x4:
+        // skip if vx != nn
+        if(REGISTERS[n2] != NN) {
+            PROGRAM_COUNTER+=2;
+        }
+        break;
+    case 0x5:
+        // skip if vx == vy
+        if(REGISTERS[n2] == REGISTERS[n3]) {
+            PROGRAM_COUNTER+=2;
+        }
         break;
     case 0x6:
         std::cout << std::hex << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
@@ -115,6 +138,13 @@ void c8_emulator::Cycle() {
         std::cout << "Add value " << std::hex << NN << std::dec << " to register V" << n2 << "\n";
         REGISTERS[n2] += NN;
         break;
+    case 0x9:
+        // skip if vx is not equal to vy
+        if(REGISTERS[n2] != REGISTERS[n3]) {
+            PROGRAM_COUNTER+=2;
+        }
+        break;
+    
     case 0xA:
         std::cout  << "Set index register I to " << std::hex << NNN << std::dec << "\n";
         INDEX_REGISTER = NNN;
@@ -165,7 +195,8 @@ void c8_emulator::Cycle() {
         std::cout << "Unknown Nibble... \n";
         break;
     }
-       
+    
+    // should be before we do instruction stuff for some reason?
     if(increment) {
         PROGRAM_COUNTER+=2; 
     }

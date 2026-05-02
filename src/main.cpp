@@ -74,6 +74,8 @@ void Close()
     SDL_Quit();
 }
 
+// tick seperate function for timers? can keep timing seperate to cycle and allows them to run when a cycle is paused for input
+
 int main(int argc, char* args[]){
     // if(argc <= 1) {
     //     std::cout << "Error, no ROM specified (include the path to ROM in launch) \nClosing...\n";
@@ -96,7 +98,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * SCREEN_WIDTH;
 
-    std::string rom = "IBM Logo";
+    std::string rom = "test_opcode";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
