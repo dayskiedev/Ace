@@ -40,8 +40,20 @@ bool c8_emulator::Startup(std::string path_to_rom) {
     // set PC to inital start point
     PROGRAM_COUNTER = START_ADR;
 
+    // set random value seed
+    std::srand(_RAND_SEED);
+
     return true;
 }
+
+
+// All this is used for is to keep track of delay and sound timers
+// will run independent of Cycle, so if we wait for input, tick will still run
+// shoud run at 60hz aka 60 times a second (look into deltatime?)
+void c8_emulator::Tick() {
+
+}
+
 
 void c8_emulator::Cycle() {
     if(!increment) { increment = true; }
@@ -73,6 +85,9 @@ void c8_emulator::Cycle() {
     // Used for draw instruction (probably should not be doing this for EVERY instruction but switch state complains...)
     uint8_t X;
     uint8_t Y;
+
+    // 0x8XY8 made as 16bit so it can store value if it goes over the limit
+    uint16_t addValue;
 
     //std::cout << n1 << "|" << n2 << "|" << n3 << "|" << n4 << std::endl;
     std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";   
@@ -138,6 +153,74 @@ void c8_emulator::Cycle() {
         std::cout << "Add value " << std::hex << NN << std::dec << " to register V" << n2 << "\n";
         REGISTERS[n2] += NN;
         break;
+
+    // 8XYN
+    case 0x8:
+        switch (n4)
+        {
+        case 0x0:
+            // set vx to vy
+            std::cout << "Set V" << std::hex << n2 << " To V" << n3 << std::endl;
+            REGISTERS[n2] = REGISTERS[n3];
+            break;
+        case 0x1:
+            // set vx to vx | vy
+            std::cout << "Set V" << std::hex << n2 << " To an OR bitwise with V" << n3 << std::endl;
+            REGISTERS[n2] |= REGISTERS[n3];
+            break;
+        case 0x2:
+            // Binary AND
+            std::cout << "Set V" << std::hex << n2 << " To an AND bitwise with V" << n3 << std::endl;
+            REGISTERS[n2] &= REGISTERS[n3];
+            break;
+        case 0x3:
+            // Logical XOR
+            std::cout << "Set V" << std::hex << n2 << " To an XOR bitwise with V" << n3 << std::endl;
+            REGISTERS[n2] ^= REGISTERS[n3];
+            break;
+        case 0x4:
+            std::cout << "Set V" << std::hex << n2 << " To itself plus V" << n3 << std::endl;
+            addValue = REGISTERS[n2] + REGISTERS[n3];
+            REGISTERS[n2] = addValue;
+            // unlike with 0x7, if this value exceeds 255, we indicate the overflow with flipping vf to 1
+            REGISTERS[15] = 0;         
+            if(addValue > 255) {
+                REGISTERS[15] = 1;
+            } 
+            break;
+        case 0x5:
+            std::cout << "Set V" << std::hex << n2 << " To itself minus V" << n3 << std::endl;
+            // check for underflow, set vf flag if this occurs
+            REGISTERS[15] = 1;
+            if(n2 < n3) { REGISTERS[15] = 0; }
+            REGISTERS[n2] -= REGISTERS[n3];
+            break;
+        case 0x6:
+            // put the value of vy int vx should be configurable
+            std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the right)" << std::endl; 
+            REGISTERS[n2] = REGISTERS[n3];
+            // set vf to the first bit (which will be shifted out)
+            REGISTERS[15] = REGISTERS[n2] & 0x1;
+            REGISTERS[n2] >>= 1;
+            break;
+        case 0x7:
+            std::cout << "Set V" << std::hex << n2 << " To V" << n3 << " minus itself" << std::endl;
+            REGISTERS[15] = 1;
+            if(n3 < n2) { REGISTERS[15] = 0; }
+            REGISTERS[n2] = REGISTERS[n3] = REGISTERS[n2];
+            break;
+        case 0xE:
+            std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the left)" << std::endl; 
+            // this should be optional 
+            REGISTERS[n2] = REGISTERS[n3];
+            // get left most bit 
+            REGISTERS[15] = REGISTERS[n2] & 0x80; 
+            REGISTERS[n2] <<=1;
+            break;
+        default:
+            std::cout << "Unknown 8XYN nibble.\n";
+            break;
+        }    
     case 0x9:
         // skip if vx is not equal to vy
         if(REGISTERS[n2] != REGISTERS[n3]) {
@@ -151,7 +234,8 @@ void c8_emulator::Cycle() {
         break;
     case 0xC:
         // this also may indicate an end of file.
-        std::cout << "Generate a random number, AND it with NN and place in register VX\n";
+        std::cout << "Generate a random number, AND it with " << NN << " and place in register VX\n";
+        REGISTERS[n2] = NN &  (std::rand() % 128);
         break;
     case 0xD:
         std::cout << "Display/Draw\n";

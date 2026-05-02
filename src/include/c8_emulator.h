@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <bitset>
 #include <algorithm>
+#include <cstdlib>
 
 #include "c8_font.h"
 
@@ -17,8 +18,8 @@ class c8_emulator {
     public:
     bool Startup(std::string path_to_rom);
 
-    // should limit to 60hz to match timer coundown?
     void Cycle();
+    void Tick();
 
     // read-only veiw of all memory
     const uint8_t* GetMemory() { return MEMORY; }
@@ -40,11 +41,10 @@ class c8_emulator {
     uint8_t SOUND_TIMER {0};                 // does the same thing but beeps when not 0
     uint8_t REGISTERS[16]{};                 // general purpose registers
     
-
-
     // Debug info
     int romSize{};
     bool increment = true; // hacky solution so specific instructions can stop the PC from incremeneting
+    int _RAND_SEED = 42;   // Makes it easy to recreate random events for debugging 
     
 };
 
