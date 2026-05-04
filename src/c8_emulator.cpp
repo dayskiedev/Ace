@@ -324,13 +324,34 @@ void c8_emulator::Cycle() {
         case 0x33:
             // binary decimal convert
             // split the value at n2 into 3 values
-            MEMORY[INDEX_REGISTER] == n2;
-            MEMORY[INDEX_REGISTER+1] == n2;
-            MEMORY[INDEX_REGISTER+2] == n2;
+            // this is not working.... maybe? check when memory set implemented
+            std::cout << "Splitting " << (int)REGISTERS[n2] << " into " << REGISTERS[n2]/100 << " " << (REGISTERS[n2]%100) / 10 << " " << REGISTERS[n2] % 10 << std::endl;
+
+
+            MEMORY[INDEX_REGISTER] = REGISTERS[n2] / 100; // returns first digit, / floors so no carryover
+            MEMORY[INDEX_REGISTER+1] = (REGISTERS[n2] % 100) / 10;
+            MEMORY[INDEX_REGISTER+2] = REGISTERS[n2] % 10; 
+            break;
+        // store and load memory
+        case 0x55:
+            std::cout << "allocating valuea from memory to register V0 -> V" << (int)n2 << std::endl;
+            for(int i = 0; i <= n2; ++i) {
+                //std::cout << "allocating value " << (int)n2 << " to register " << i << std::endl;
+                MEMORY[INDEX_REGISTER+i] = REGISTERS[i];
+            }
+
+            break;
+        case 0x65:
+            std::cout << "allocating valuea from registers V0 -> V" << (int)n2 << " into memory" << std::endl;
+            for(int i = 0; i <= n2; ++i) {
+                //std::cout << "allocating register value " << (int)n2 << " to memory index " << i << std::endl;
+                REGISTERS[i] = MEMORY[INDEX_REGISTER+i];
+            }
             break;
         default:
             break;
         }
+        break;
     default:
         std::cout << "Unknown Nibble... \n";
         break;
