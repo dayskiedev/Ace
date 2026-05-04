@@ -56,6 +56,7 @@ bool Init() {
         return false;
     }
     std::cout << "Renderer created" << std::endl;
+
     SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
 
     SDL_SetRenderScale(gRenderer, SCREEN_SCALE, SCREEN_SCALE);
@@ -74,6 +75,73 @@ void Close()
     SDL_Quit();
 }
 
+
+// we dont want to just set the register whenever
+// we want to wait until we are requesting an input
+// we only need to set the hexideceimal value
+
+void CheckForInput(SDL_Event& e, c8_emulator& c8) {
+    if(e.type == SDL_EVENT_KEY_DOWN) {
+        switch (e.key.key) {
+        case SDLK_1:
+            // set hex value to 1
+            c8.SetInputValue(0x1);
+            break;
+        case SDLK_2:
+            c8.SetInputValue(0x2);
+            break;
+        case SDLK_3:
+            c8.SetInputValue(0x3);
+            break;
+        case SDLK_4:
+            c8.SetInputValue(0xC);
+            break;
+        case SDLK_Q:
+            c8.SetInputValue(0x4);
+            break;
+        case SDLK_W:
+            c8.SetInputValue(0x5);
+            break;
+        case SDLK_E:
+            c8.SetInputValue(0x6);
+            break;
+        case SDLK_R:
+            c8.SetInputValue(0xD);
+            break;
+        case SDLK_A:
+            c8.SetInputValue(0x7);
+            break;
+        case SDLK_S:
+            c8.SetInputValue(0x8);
+            break;
+        case SDLK_D:
+            c8.SetInputValue(0x9);
+            break;
+        case SDLK_F:
+            c8.SetInputValue(0xE);
+            break;
+        case SDLK_Z:
+            c8.SetInputValue(0xA);
+            break;
+        case SDLK_X:
+            c8.SetInputValue(0x0);
+            break;
+        case SDLK_C:
+            c8.SetInputValue(0xB);
+            break;
+        case SDLK_V:
+            c8.SetInputValue(0xF);
+            break;
+        default:
+            break;
+        }
+    }
+    else if(e.type == SDL_EVENT_KEY_UP) {
+        c8.SetInputValue(99);
+    }
+
+    // when a key is not down, set hexvalue to -99 or something out of range
+}
 // tick seperate function for timers? can keep timing seperate to cycle and allows them to run when a cycle is paused for input
 
 int main(int argc, char* args[]){
@@ -93,12 +161,13 @@ int main(int argc, char* args[]){
 
     // no idea what SDL_PIXELFORMAT_RGBA8888 does...
     // SDL_TEXTUREACCESS_STREAMING = texture changes constantly (it does)
+    // when screen width is doubled you gget 2 copies of the texture, when screen height is doubled it crashes..
     SDL_Texture* videoTexture = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
     SDL_SetTextureScaleMode(videoTexture, SDL_SCALEMODE_PIXELART);
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * SCREEN_WIDTH;
 
-    std::string rom = "IBM Logo";
+    std::string rom = "test_opcode";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -121,8 +190,12 @@ int main(int argc, char* args[]){
         SDL_PollEvent( &e );
         if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
-        // call updates here
-        // pass through renderer to update screen?
+        // check for input
+        CheckForInput(e, emulator);
+
+        // tick clocks
+
+        // run a cycle of emulator
         emulator.Cycle();
 
         // if(e.type == SDL_EVENT_KEY_DOWN) {
@@ -135,8 +208,10 @@ int main(int argc, char* args[]){
         // }
         SDL_RenderClear(gRenderer);
         //SDL_SetRenderDrawColor(gRenderer,0,0,0,0);
+        // copy texture to a rect and render that so its seperate from screen width/height?
         SDL_UpdateTexture(videoTexture, nullptr, emulator.VIDEO, video_pitch);
         SDL_RenderTexture(gRenderer, videoTexture, nullptr, nullptr);
+
         SDL_RenderPresent(gRenderer);
     }
 

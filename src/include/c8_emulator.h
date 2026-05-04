@@ -19,7 +19,12 @@ class c8_emulator {
     bool Startup(std::string path_to_rom);
 
     void Cycle();
+
+    // should run at 60hz
     void Tick();
+
+    // set register value from input 
+    void SetInputValue(uint16_t input) { INPUT_VALUE = input; }
 
     // read-only veiw of all memory
     const uint8_t* GetMemory() { return MEMORY; }
@@ -40,6 +45,8 @@ class c8_emulator {
     uint8_t DELAY_TIMER {0};                 // decrements at 60hz until 0
     uint8_t SOUND_TIMER {0};                 // does the same thing but beeps when not 0
     uint8_t REGISTERS[16]{};                 // general purpose registers
+
+    uint8_t INPUT_VALUE {99};                // default to 99 so out of range, if value is anything but 99 we know we have an input?
     
     // Debug info
     int romSize{};

@@ -51,7 +51,12 @@ bool c8_emulator::Startup(std::string path_to_rom) {
 // will run independent of Cycle, so if we wait for input, tick will still run
 // shoud run at 60hz aka 60 times a second (look into deltatime?)
 void c8_emulator::Tick() {
+    if(DELAY_TIMER > 0) { DELAY_TIMER--; }
 
+    if(SOUND_TIMER > 0) {
+        SOUND_TIMER--;
+        // play beep.
+    }
 }
 
 
@@ -233,6 +238,7 @@ void c8_emulator::Cycle() {
     case 0xC:
         // this also may indicate an end of file.
         std::cout << "Generate a random number, AND it with " << NN << " and place in register VX\n";
+        // this random value may not be fully random each time?
         REGISTERS[n2] = NN &  (std::rand() % 128);
         break;
     case 0xD:
@@ -260,6 +266,7 @@ void c8_emulator::Cycle() {
                 // XOR FF = false, TT = false, TF = True, FT = true
                 if(bit == 1) {
                     if(VIDEO[position] == PIXEL_ON) {
+                        // fade out
                         VIDEO[position] = PIXEL_OFF;
                         REGISTERS[15] = 1; // set vf to 1
                     } else {
@@ -273,6 +280,57 @@ void c8_emulator::Cycle() {
 
         }
         break;
+    case 0xE:
+        switch (n4)
+        {
+        case 0xE:
+            // skip one instruction (+2) if the key corresponding to vx is being pressed
+            if(INPUT_VALUE == n2) {
+                PROGRAM_COUNTER += 2;
+            }
+            break;
+        case 0x1:
+            // skp one instruction if key corresponding to vx is NOT pressed
+            if(INPUT_VALUE != n2) {
+                PROGRAM_COUNTER += 2;
+            }
+            break;
+        default:
+            break;
+        }
+    case 0xF:
+        switch (NN) {
+            // may not work correctly. please do
+        case 0x07:
+            REGISTERS[n2] = DELAY_TIMER;
+            break;
+        case 0x15:
+            DELAY_TIMER = REGISTERS[n2];
+            break;
+        case 0x18:
+            SOUND_TIMER = REGISTERS[n2];
+            break;  
+        case 0x1E:
+            INDEX_REGISTER += REGISTERS[n2];
+            break;
+        case 0x0A:
+            std::cout << "Waiting for input...\n";
+            if(INPUT_VALUE == 99) {
+                PROGRAM_COUNTER -= 2; // move back 2 so we stay on this instruction until we detect input
+            } else {
+                REGISTERS[n2] = INPUT_VALUE;
+            }
+            break;
+        case 0x33:
+            // binary decimal convert
+            // split the value at n2 into 3 values
+            MEMORY[INDEX_REGISTER] == n2;
+            MEMORY[INDEX_REGISTER+1] == n2;
+            MEMORY[INDEX_REGISTER+2] == n2;
+            break;
+        default:
+            break;
+        }
     default:
         std::cout << "Unknown Nibble... \n";
         break;
