@@ -18,6 +18,8 @@ bool c8_emulator::Startup(std::string path_to_rom) {
     if(rom.is_open()) {
         size = rom.tellg();
         buffer = new char [size];
+
+        // ?
         rom.seekg(0, std::ios::beg);
         rom.read(buffer, size);
         rom.close();
@@ -120,17 +122,17 @@ void c8_emulator::Cycle() {
 
     case 0x1:
         // we should not be incrementing the pc counter after this jump
-        std::cout << "Jump to: " << std::hex << NNN <<  std::dec << std::endl;
+        std::cout << "Jump to: " << std::hex << NNN <<  std::dec << "\n";
         PROGRAM_COUNTER = NNN;
         break;
     case 0x2:
         // call subroutine at memory NNN first push current PC tho
-        std::cout << "Push current address to ADDRESS_STACK and set PC to  " << std::hex << NNN <<  std::dec << std::endl;
+        std::cout << "Push current address to ADDRESS_STACK and set PC to  " << std::hex << NNN <<  std::dec << "\n";
         ADDRESS_STACK.push(PROGRAM_COUNTER);
         PROGRAM_COUNTER = NNN;
         break;
     case 0x3:
-        std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << std::endl;
+        std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << "\n";
         if(REGISTERS[n2] == NN) {
             PROGRAM_COUNTER+=2; // remember an instruction is 2 bytes, so we have to skip twice (could just set increment to true?)
         }
@@ -163,26 +165,26 @@ void c8_emulator::Cycle() {
         {
         case 0x0:
             // set vx to vy
-            std::cout << "Set V" << std::hex << n2 << " To V" << n3 << std::endl;
+            std::cout << "Set V" << std::hex << n2 << " To V" << n3 << "\n";
             REGISTERS[n2] = REGISTERS[n3];
             break;
         case 0x1:
             // set vx to vx | vy
-            std::cout << "Set V" << std::hex << n2 << " To an OR bitwise with V" << n3 << std::endl;
+            std::cout << "Set V" << std::hex << n2 << " To an OR bitwise with V" << n3 << "\n";
             REGISTERS[n2] |= REGISTERS[n3];
             break;
         case 0x2:
             // Binary AND
-            std::cout << "Set V" << std::hex << n2 << " To an AND bitwise with V" << n3 << std::endl;
+            std::cout << "Set V" << std::hex << n2 << " To an AND bitwise with V" << n3 << "\n";
             REGISTERS[n2] &= REGISTERS[n3];
             break;
         case 0x3:
             // Logical XOR
-            std::cout << "Set V" << std::hex << n2 << " To an XOR bitwise with V" << n3 << std::endl;
+            std::cout << "Set V" << std::hex << n2 << " To an XOR bitwise with V" << n3 << "\n";
             REGISTERS[n2] ^= REGISTERS[n3];
             break;
         case 0x4:
-            std::cout << "Set V" << std::hex << n2 << " To itself plus V" << n3 << std::endl;
+            std::cout << "Set V" << std::hex << n2 << " To itself plus V" << n3 << "\n";
             addValue = REGISTERS[n2] + REGISTERS[n3];
             REGISTERS[n2] = addValue;
             // unlike with 0x7, if this value exceeds 255, we indicate the overflow with flipping vf to 1
@@ -192,7 +194,7 @@ void c8_emulator::Cycle() {
             } 
             break;
         case 0x5:
-            std::cout << "Set V" << std::hex << n2 << " To itself minus V" << n3 << std::endl;
+            std::cout << "Set V" << std::hex << n2 << " To itself minus V" << n3 << "\n";
             // check for underflow, set vf flag if this occurs
             REGISTERS[15] = 1;
             if(n2 < n3) { REGISTERS[15] = 0; }
@@ -200,20 +202,20 @@ void c8_emulator::Cycle() {
             break;
         case 0x6:
             // put the value of vy int vx should be configurable
-            std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the right)" << std::endl; 
+            std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the right)\n"; 
             REGISTERS[n2] = REGISTERS[n3];
             // set vf to the first bit (which will be shifted out)
             REGISTERS[15] = REGISTERS[n2] & 0x1;
             REGISTERS[n2] >>= 1;
             break;
         case 0x7:
-            std::cout << "Set V" << std::hex << n2 << " To V" << n3 << " minus itself" << std::endl;
+            std::cout << "Set V" << std::hex << n2 << " To V" << n3 << " minus itself\n";
             REGISTERS[15] = 1;
             if(n3 < n2) { REGISTERS[15] = 0; }
             REGISTERS[n2] = REGISTERS[n3] = REGISTERS[n2];
             break;
         case 0xE:
-            std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the left)" << std::endl; 
+            std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the left)\n"; 
             // this should be optional 
             REGISTERS[n2] = REGISTERS[n3];
             // get left most bit 
@@ -285,13 +287,15 @@ void c8_emulator::Cycle() {
         {
         case 0xE:
             // skip one instruction (+2) if the key corresponding to vx is being pressed
-            if(INPUT_VALUE == n2) {
+            std::cout << "Skip one instruction if input value is equal to V" << (int)REGISTERS[n2] << "\n";
+            if(INPUT_VALUE == REGISTERS[n2]) {
                 PROGRAM_COUNTER += 2;
             }
             break;
         case 0x1:
             // skp one instruction if key corresponding to vx is NOT pressed
-            if(INPUT_VALUE != n2) {
+            std::cout << "Skip one instruction if input value is NOT equal to V" << (int)REGISTERS[n2] << "\n";
+            if(INPUT_VALUE != REGISTERS[n2]) {
                 PROGRAM_COUNTER += 2;
             }
             break;
@@ -334,7 +338,7 @@ void c8_emulator::Cycle() {
             break;
         // store and load memory
         case 0x55:
-            std::cout << "allocating valuea from memory to register V0 -> V" << (int)n2 << std::endl;
+            std::cout << "allocating valuea from memory to register V0 -> V" << (int)n2 << "\n";
             for(int i = 0; i <= n2; ++i) {
                 //std::cout << "allocating value " << (int)n2 << " to register " << i << std::endl;
                 MEMORY[INDEX_REGISTER+i] = REGISTERS[i];
@@ -342,7 +346,7 @@ void c8_emulator::Cycle() {
 
             break;
         case 0x65:
-            std::cout << "allocating valuea from registers V0 -> V" << (int)n2 << " into memory" << std::endl;
+            std::cout << "allocating valuea from registers V0 -> V" << (int)n2 << " into memory\n";
             for(int i = 0; i <= n2; ++i) {
                 //std::cout << "allocating register value " << (int)n2 << " to memory index " << i << std::endl;
                 REGISTERS[i] = MEMORY[INDEX_REGISTER+i];
