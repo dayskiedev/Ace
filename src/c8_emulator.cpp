@@ -256,7 +256,7 @@ void c8_emulator::Cycle() {
             uint8_t spriteData = MEMORY[INDEX_REGISTER + i];
             for(int b = 0; b < 8; ++b) {
                 // scroll guard if we reach over 64, we don't want to draw anything (may cause issues...)
-                if(X >= 64) { continue; } 
+                if(X >= 64) { break; } 
 
                 // get most significant bit from spirteData, move it to first index so its either 1 or 0
                 uint8_t bit = (spriteData & 0x80) >> 7;

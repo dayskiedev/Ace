@@ -167,7 +167,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * SCREEN_WIDTH;
 
-    std::string rom = "sa";
+    std::string rom = "tetris";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -228,6 +228,8 @@ int main(int argc, char* args[]){
 
         // run a cycle of emulator
         emulator.Cycle();
+
+
 
         // if(e.type == SDL_EVENT_KEY_DOWN) {
         //     if(e.key.key == SDLK_L) {
