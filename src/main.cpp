@@ -167,7 +167,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * SCREEN_WIDTH;
 
-    std::string rom = "tetris";
+    std::string rom = "c4";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -183,8 +183,15 @@ int main(int argc, char* args[]){
     SDL_Event e;
     SDL_zero( e );
 
+
+    // make this optional CLI args
+    int _instructionPerSec = 700;
+    int _ticksPerSec = 60;
+
+    double insTickSpeed = 1000/_instructionPerSec; // run an instruction every 1.43ms to get 700i/s
+    double insTickCount = 0;
     double tickCount = 0; 
-    double tickSpeed = 16.67; // run a tick every 16ms so we get 60t/s roughly for timer
+    double tickSpeed = 1000/_ticksPerSec; // run a tick every 16ms so we get 60t/s roughly for timer
     Uint64 NOW = SDL_GetPerformanceCounter();
     Uint64 THEN = 0;
 
@@ -227,7 +234,16 @@ int main(int argc, char* args[]){
         // every 16.6ms run tick
 
         // run a cycle of emulator
-        emulator.Cycle();
+
+        // shold be around 700 instructions a second
+
+        if(insTickCount >= insTickSpeed) {
+            emulator.Cycle();
+            insTickCount -= insTickSpeed;
+        }
+
+        insTickCount += deltatime;
+
 
 
 

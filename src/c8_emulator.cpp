@@ -101,19 +101,19 @@ void c8_emulator::Cycle() {
     uint16_t addValue;
 
     //std::cout << n1 << "|" << n2 << "|" << n3 << "|" << n4 << std::endl;
-    std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";   
+    //std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";   
     
     // [execute]
     switch (n1) {
     case 0x0:
         switch (opcode) {
         case 0x00E0:
-            std::cout << "Clear screen\n";
+            //std::cout << "Clear screen\n";
             std::fill(VIDEO, VIDEO+((64*32)), PIXEL_OFF);
             break;
         case 0x00EE:
             // pop last address from stack setting PC to it.
-            std::cout << "Pop from top of Address Stack and set PC to its value\n";
+            //std::cout << "Pop from top of Address Stack and set PC to its value\n";
             PROGRAM_COUNTER = ADDRESS_STACK.top();
             ADDRESS_STACK.pop();
             break;
@@ -122,17 +122,17 @@ void c8_emulator::Cycle() {
 
     case 0x1:
         // we should not be incrementing the pc counter after this jump
-        std::cout << "Jump to: " << std::hex << NNN <<  std::dec << "\n";
+        //std::cout << "Jump to: " << std::hex << NNN <<  std::dec << "\n";
         PROGRAM_COUNTER = NNN;
         break;
     case 0x2:
         // call subroutine at memory NNN first push current PC tho
-        std::cout << "Push current address to ADDRESS_STACK and set PC to  " << std::hex << NNN <<  std::dec << "\n";
+        //std::cout << "Push current address to ADDRESS_STACK and set PC to  " << std::hex << NNN <<  std::dec << "\n";
         ADDRESS_STACK.push(PROGRAM_COUNTER);
         PROGRAM_COUNTER = NNN;
         break;
     case 0x3:
-        std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << "\n";
+        //std::cout << "Skip 1 instruction if the value in V" << std::hex << n2 << " is equal to " << NN << std::dec << "\n";
         if(REGISTERS[n2] == NN) {
             PROGRAM_COUNTER+=2; // remember an instruction is 2 bytes, so we have to skip twice (could just set increment to true?)
         }
@@ -140,7 +140,7 @@ void c8_emulator::Cycle() {
     case 0x4:
         // skip if vx != nn
         if(REGISTERS[n2] != NN) {
-            std::cout << "Skip if " << (int)REGISTERS[n2] << " is NOT equal to " << NN << "\n";
+            //std::cout << "Skip if " << (int)REGISTERS[n2] << " is NOT equal to " << NN << "\n";
             PROGRAM_COUNTER+=2;
         }
         break;
@@ -152,12 +152,12 @@ void c8_emulator::Cycle() {
         }
         break;
     case 0x6:
-        std::cout << std::hex << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
+        //std::cout << std::hex << "Set register V" << n2 << " to " << std::hex << NN << std::dec << "\n";
         REGISTERS[n2] = NN;
         //std::cout << REGISTERS[n2] << " < val of reg" << std::endl;
         break;
     case 0x7:
-        std::cout << "Add value " << std::hex << NN << std::dec << " to register V" << n2 << "\n";
+        //std::cout << "Add value " << std::hex << NN << std::dec << " to register V" << n2 << "\n";
         REGISTERS[n2] += NN;
         break;
 
@@ -166,26 +166,26 @@ void c8_emulator::Cycle() {
         switch (n4) {
         case 0x0:
             // set vx to vy
-            std::cout << "Set V" << std::hex << n2 << " To V" << n3 << "\n";
+            //std::cout << "Set V" << std::hex << n2 << " To V" << n3 << "\n";
             REGISTERS[n2] = REGISTERS[n3];
             break;
         case 0x1:
             // set vx to vx | vy
-            std::cout << "Set V" << std::hex << n2 << " To an OR bitwise with V" << n3 << "\n";
+            //std::cout << "Set V" << std::hex << n2 << " To an OR bitwise with V" << n3 << "\n";
             REGISTERS[n2] |= REGISTERS[n3];
             break;
         case 0x2:
             // Binary AND
-            std::cout << "Set V" << std::hex << n2 << " To an AND bitwise with V" << n3 << "\n";
+            //std::cout << "Set V" << std::hex << n2 << " To an AND bitwise with V" << n3 << "\n";
             REGISTERS[n2] &= REGISTERS[n3];
             break;
         case 0x3:
             // Logical XOR
-            std::cout << "Set V" << std::hex << n2 << " To an XOR bitwise with V" << n3 << "\n";
+            //std::cout << "Set V" << std::hex << n2 << " To an XOR bitwise with V" << n3 << "\n";
             REGISTERS[n2] ^= REGISTERS[n3];
             break;
         case 0x4:
-            std::cout << "Set V" << std::hex << n2 << " To itself plus V" << n3 << "\n";
+            //std::cout << "Set V" << std::hex << n2 << " To itself plus V" << n3 << "\n";
             addValue = REGISTERS[n2] + REGISTERS[n3];
             REGISTERS[n2] = addValue;
             // unlike with 0x7, if this value exceeds 255, we indicate the overflow with flipping vf to 1
@@ -195,7 +195,7 @@ void c8_emulator::Cycle() {
             } 
             break;
         case 0x5:
-            std::cout << "Set V" << std::hex << n2 << " To itself minus V" << n3 << "\n";
+            //std::cout << "Set V" << std::hex << n2 << " To itself minus V" << n3 << "\n";
             // check for underflow, set vf flag if this occurs
             REGISTERS[15] = 1;
             if(REGISTERS[n2] < REGISTERS[n3]) { REGISTERS[15] = 0; }
@@ -203,20 +203,20 @@ void c8_emulator::Cycle() {
             break;
         case 0x6:
             // put the value of vy int vx should be configurable
-            std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the right)\n"; 
+            //std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the right)\n"; 
             REGISTERS[n2] = REGISTERS[n3];
             // set vf to the first bit (which will be shifted out)
             REGISTERS[15] = REGISTERS[n2] & 0x1;
             REGISTERS[n2] >>= 1;
             break;
         case 0x7:
-            std::cout << "Set V" << std::hex << n2 << " To V" << n3 << " minus itself\n";
+            //std::cout << "Set V" << std::hex << n2 << " To V" << n3 << " minus itself\n";
             REGISTERS[15] = 1;
             if(REGISTERS[n3] < REGISTERS[n2]) { REGISTERS[15] = 0; }
             REGISTERS[n2] = REGISTERS[n3] = REGISTERS[n2];
             break;
         case 0xE:
-            std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the left)\n"; 
+            //std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the left)\n"; 
             // this should be optional 
             REGISTERS[n2] = REGISTERS[n3];
             // get left most bit 
@@ -224,30 +224,30 @@ void c8_emulator::Cycle() {
             REGISTERS[n2] <<=1;
             break;
         default:
-            std::cout << "Unknown 8XYN nibble.\n";
+            //std::cout << "Unknown 8XYN nibble.\n";
             break;
         }    
         break;  
     case 0x9:
         // skip if vx is not equal to vy
-        std::cout << "Skip if " << (int)REGISTERS[n2] << " is NOT equal to " << (int)REGISTERS[n3] << "\n";
+        //std::cout << "Skip if " << (int)REGISTERS[n2] << " is NOT equal to " << (int)REGISTERS[n3] << "\n";
         if(REGISTERS[n2] != REGISTERS[n3]) {
             PROGRAM_COUNTER+=2;
         }
         break;
     
     case 0xA:
-        std::cout  << "Set index register I to " << std::hex << NNN << std::dec << "\n";
+        //std::cout  << "Set index register I to " << std::hex << NNN << std::dec << "\n";
         INDEX_REGISTER = NNN;
         break;
     case 0xC:
         // this also may indicate an end of file.
-        std::cout << "Generate a random number, AND it with " << NN << " and place in register VX\n";
+        //std::cout << "Generate a random number, AND it with " << NN << " and place in register VX\n";
         // this random value may not be fully random each time?
         REGISTERS[n2] = NN &  (std::rand() % 128);
         break;
     case 0xD:
-        std::cout << "Display/Draw\n";
+        //std::cout << "Display/Draw\n";
         X = REGISTERS[n2] % 64;
         Y = REGISTERS[n3] % 32;
         REGISTERS[15] = 0;
@@ -289,14 +289,14 @@ void c8_emulator::Cycle() {
         switch (n4) {
             case 0xE:
                 // skip one instruction (+2) if the key corresponding to vx is being pressed
-                std::cout << "Skip one instruction if input value is equal to V" << (int)REGISTERS[n2] << "\n";
+                //std::cout << "Skip one instruction if input value is equal to V" << (int)REGISTERS[n2] << "\n";
                 if(INPUT_VALUE == REGISTERS[n2]) {
                     PROGRAM_COUNTER += 2;
                 }
                 break;
             case 0x1:
                 // skp one instruction if key corresponding to vx is NOT pressed
-                std::cout << "Skip one instruction if input value is NOT equal to V" << (int)REGISTERS[n2] << "\n";
+                //std::cout << "Skip one instruction if input value is NOT equal to V" << (int)REGISTERS[n2] << "\n";
                 if(INPUT_VALUE != REGISTERS[n2]) {
                     PROGRAM_COUNTER += 2;
                 }
@@ -309,23 +309,23 @@ void c8_emulator::Cycle() {
         switch (NN) {
             // may not work correctly. please do
         case 0x07:
-            std::cout << "Set V" << (int)REGISTERS[n2] << " to current delay timer value: " << (int)DELAY_TIMER << "\n";
+            //std::cout << "Set V" << (int)REGISTERS[n2] << " to current delay timer value: " << (int)DELAY_TIMER << "\n";
             REGISTERS[n2] = DELAY_TIMER;
             break;
         case 0x15:
-            std::cout << "Set delay timer to value in V" << (int)REGISTERS[n2] << "\n";
+            //std::cout << "Set delay timer to value in V" << (int)REGISTERS[n2] << "\n";
             DELAY_TIMER = REGISTERS[n2];
             break;
         case 0x18:
-            std::cout << "Set sound timer to value in V" << (int)REGISTERS[n2] << "\n";
+            //std::cout << "Set sound timer to value in V" << (int)REGISTERS[n2] << "\n";
             SOUND_TIMER = REGISTERS[n2];
             break;  
         case 0x1E:
-            std::cout << "Adding the value " << (int)REGISTERS[n2] << " to index register\n";
+            //std::cout << "Adding the value " << (int)REGISTERS[n2] << " to index register\n";
             INDEX_REGISTER += REGISTERS[n2];
             break;
         case 0x0A:
-            std::cout << "Waiting for input...\n";
+            //std::cout << "Waiting for input...\n";
             if(INPUT_VALUE == 99) {
                 PROGRAM_COUNTER -= 2; // move back 2 so we stay on this instruction until we detect input
             } else {
@@ -333,7 +333,7 @@ void c8_emulator::Cycle() {
             }
             break;
         case 0x29:
-            std::cout << "Grabbing character from font memory\n";
+            //std::cout << "Grabbing character from font memory\n";
             // edges arecut off.
             INDEX_REGISTER = (REGISTERS[n2] * 5)+ fontStartAddr;
             break;
@@ -341,7 +341,7 @@ void c8_emulator::Cycle() {
             // binary decimal convert
             // split the value at n2 into 3 values
             // this is not working.... maybe? check when memory set implemented
-            std::cout << "Splitting " << (int)REGISTERS[n2] << " into " << REGISTERS[n2]/100 << " " << (REGISTERS[n2]%100) / 10 << " " << REGISTERS[n2] % 10 << std::endl;
+            //std::cout << "Splitting " << (int)REGISTERS[n2] << " into " << REGISTERS[n2]/100 << " " << (REGISTERS[n2]%100) / 10 << " " << REGISTERS[n2] % 10 << std::endl;
 
             MEMORY[INDEX_REGISTER] = REGISTERS[n2] / 100; // returns first digit, / floors so no carryover
             MEMORY[INDEX_REGISTER+1] = (REGISTERS[n2] % 100) / 10;
@@ -349,14 +349,14 @@ void c8_emulator::Cycle() {
             break;
         // store and load memory
         case 0x55:
-            std::cout << "allocating valuea from memory to register V0 -> V" << (int)n2 << "\n";
+            //std::cout << "allocating valuea from memory to register V0 -> V" << (int)n2 << "\n";
             for(int i = 0; i <= n2; ++i) {
                 //std::cout << "allocating value " << (int)n2 << " to register " << i << std::endl;
                 MEMORY[INDEX_REGISTER+i] = REGISTERS[i];
             }
             break;
         case 0x65:
-            std::cout << "allocating valuea from registers V0 -> V" << (int)n2 << " into memory\n";
+            //std::cout << "allocating valuea from registers V0 -> V" << (int)n2 << " into memory\n";
             for(int i = 0; i <= n2; ++i) {
                 //std::cout << "allocating register value " << (int)n2 << " to memory index " << i << std::endl;
                 REGISTERS[i] = MEMORY[INDEX_REGISTER+i];
