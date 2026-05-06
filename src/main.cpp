@@ -167,7 +167,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * SCREEN_WIDTH;
 
-    std::string rom = "Tetris";
+    std::string rom = "sa";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -213,11 +213,15 @@ int main(int argc, char* args[]){
 
         if(tickCount >= tickSpeed) {
             emulator.Tick();
-            std::cout << "Tick\n";
+
+            //std::cout << "Tick\n";
+
+            // we want to keep any overlapping frames to keep it steady
             tickCount -= tickSpeed;
         }
 
         tickCount += deltatime;
+
 
         // keep a countn that increases to 60?
         // every 16.6ms run tick

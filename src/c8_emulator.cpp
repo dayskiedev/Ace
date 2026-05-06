@@ -140,12 +140,14 @@ void c8_emulator::Cycle() {
     case 0x4:
         // skip if vx != nn
         if(REGISTERS[n2] != NN) {
+            std::cout << "Skip if " << (int)REGISTERS[n2] << " is NOT equal to " << NN << "\n";
             PROGRAM_COUNTER+=2;
         }
         break;
     case 0x5:
         // skip if vx == vy
         if(REGISTERS[n2] == REGISTERS[n3]) {
+            std::cout << "Skip if " << (int)REGISTERS[n2] << " is equal to " << NN << "\n";
             PROGRAM_COUNTER+=2;
         }
         break;
@@ -161,8 +163,7 @@ void c8_emulator::Cycle() {
 
     // 8XYN
     case 0x8:
-        switch (n4)
-        {
+        switch (n4) {
         case 0x0:
             // set vx to vy
             std::cout << "Set V" << std::hex << n2 << " To V" << n3 << "\n";
@@ -197,7 +198,7 @@ void c8_emulator::Cycle() {
             std::cout << "Set V" << std::hex << n2 << " To itself minus V" << n3 << "\n";
             // check for underflow, set vf flag if this occurs
             REGISTERS[15] = 1;
-            if(n2 < n3) { REGISTERS[15] = 0; }
+            if(REGISTERS[n2] < REGISTERS[n3]) { REGISTERS[15] = 0; }
             REGISTERS[n2] -= REGISTERS[n3];
             break;
         case 0x6:
@@ -211,7 +212,7 @@ void c8_emulator::Cycle() {
         case 0x7:
             std::cout << "Set V" << std::hex << n2 << " To V" << n3 << " minus itself\n";
             REGISTERS[15] = 1;
-            if(n3 < n2) { REGISTERS[15] = 0; }
+            if(REGISTERS[n3] < REGISTERS[n2]) { REGISTERS[15] = 0; }
             REGISTERS[n2] = REGISTERS[n3] = REGISTERS[n2];
             break;
         case 0xE:
@@ -226,8 +227,10 @@ void c8_emulator::Cycle() {
             std::cout << "Unknown 8XYN nibble.\n";
             break;
         }    
+        break;  
     case 0x9:
         // skip if vx is not equal to vy
+        std::cout << "Skip if " << (int)REGISTERS[n2] << " is NOT equal to " << (int)REGISTERS[n3] << "\n";
         if(REGISTERS[n2] != REGISTERS[n3]) {
             PROGRAM_COUNTER+=2;
         }
@@ -283,39 +286,42 @@ void c8_emulator::Cycle() {
         }
         break;
     case 0xE:
-        switch (n4)
-        {
-        case 0xE:
-            // skip one instruction (+2) if the key corresponding to vx is being pressed
-            std::cout << "Skip one instruction if input value is equal to V" << (int)REGISTERS[n2] << "\n";
-            if(INPUT_VALUE == REGISTERS[n2]) {
-                PROGRAM_COUNTER += 2;
+        switch (n4) {
+            case 0xE:
+                // skip one instruction (+2) if the key corresponding to vx is being pressed
+                std::cout << "Skip one instruction if input value is equal to V" << (int)REGISTERS[n2] << "\n";
+                if(INPUT_VALUE == REGISTERS[n2]) {
+                    PROGRAM_COUNTER += 2;
+                }
+                break;
+            case 0x1:
+                // skp one instruction if key corresponding to vx is NOT pressed
+                std::cout << "Skip one instruction if input value is NOT equal to V" << (int)REGISTERS[n2] << "\n";
+                if(INPUT_VALUE != REGISTERS[n2]) {
+                    PROGRAM_COUNTER += 2;
+                }
+                break;
+            default:
+                break;
             }
-            break;
-        case 0x1:
-            // skp one instruction if key corresponding to vx is NOT pressed
-            std::cout << "Skip one instruction if input value is NOT equal to V" << (int)REGISTERS[n2] << "\n";
-            if(INPUT_VALUE != REGISTERS[n2]) {
-                PROGRAM_COUNTER += 2;
-            }
-            break;
-        default:
-            break;
-        }
+        break;
     case 0xF:
         switch (NN) {
             // may not work correctly. please do
         case 0x07:
-            std::cout << "Set V" << REGISTERS[n2] << " to current delay timer value: " << DELAY_TIMER << "\n";
+            std::cout << "Set V" << (int)REGISTERS[n2] << " to current delay timer value: " << (int)DELAY_TIMER << "\n";
             REGISTERS[n2] = DELAY_TIMER;
             break;
         case 0x15:
+            std::cout << "Set delay timer to value in V" << (int)REGISTERS[n2] << "\n";
             DELAY_TIMER = REGISTERS[n2];
             break;
         case 0x18:
+            std::cout << "Set sound timer to value in V" << (int)REGISTERS[n2] << "\n";
             SOUND_TIMER = REGISTERS[n2];
             break;  
         case 0x1E:
+            std::cout << "Adding the value " << (int)REGISTERS[n2] << " to index register\n";
             INDEX_REGISTER += REGISTERS[n2];
             break;
         case 0x0A:
@@ -326,12 +332,16 @@ void c8_emulator::Cycle() {
                 REGISTERS[n2] = INPUT_VALUE;
             }
             break;
+        case 0x29:
+            std::cout << "Grabbing character from font memory\n";
+            // edges arecut off.
+            INDEX_REGISTER = (REGISTERS[n2] * 5)+ fontStartAddr;
+            break;
         case 0x33:
             // binary decimal convert
             // split the value at n2 into 3 values
             // this is not working.... maybe? check when memory set implemented
             std::cout << "Splitting " << (int)REGISTERS[n2] << " into " << REGISTERS[n2]/100 << " " << (REGISTERS[n2]%100) / 10 << " " << REGISTERS[n2] % 10 << std::endl;
-
 
             MEMORY[INDEX_REGISTER] = REGISTERS[n2] / 100; // returns first digit, / floors so no carryover
             MEMORY[INDEX_REGISTER+1] = (REGISTERS[n2] % 100) / 10;
@@ -344,7 +354,6 @@ void c8_emulator::Cycle() {
                 //std::cout << "allocating value " << (int)n2 << " to register " << i << std::endl;
                 MEMORY[INDEX_REGISTER+i] = REGISTERS[i];
             }
-
             break;
         case 0x65:
             std::cout << "allocating valuea from registers V0 -> V" << (int)n2 << " into memory\n";
@@ -353,7 +362,9 @@ void c8_emulator::Cycle() {
                 REGISTERS[i] = MEMORY[INDEX_REGISTER+i];
             }
             break;
+
         default:
+            std::cout << "Unknown Nibble... \n";
             break;
         }
         break;
