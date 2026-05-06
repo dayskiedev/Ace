@@ -167,7 +167,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * SCREEN_WIDTH;
 
-    std::string rom = "tetris";
+    std::string rom = "Tetris";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -183,9 +183,23 @@ int main(int argc, char* args[]){
     SDL_Event e;
     SDL_zero( e );
 
+    double tickCount = 0; 
+    double tickSpeed = 16.67; // run a tick every 16ms so we get 60t/s roughly for timer
+    Uint64 NOW = SDL_GetPerformanceCounter();
+    Uint64 THEN = 0;
+
+
+    double deltatime = 0;
+
         //The main loop
     while( quit == false )
     {   
+
+        // calculate eltatime
+        THEN = NOW;
+        NOW = SDL_GetPerformanceCounter();
+
+        deltatime = 1000 * double(NOW - THEN) / (double)SDL_GetPerformanceFrequency();
         //Get event data
         SDL_PollEvent( &e );
         if( e.type == SDL_EVENT_QUIT ) { quit = true; }
@@ -196,6 +210,17 @@ int main(int argc, char* args[]){
         CheckForInput(e, emulator);
 
         // tick clocks
+
+        if(tickCount >= tickSpeed) {
+            emulator.Tick();
+            std::cout << "Tick\n";
+            tickCount -= tickSpeed;
+        }
+
+        tickCount += deltatime;
+
+        // keep a countn that increases to 60?
+        // every 16.6ms run tick
 
         // run a cycle of emulator
         emulator.Cycle();

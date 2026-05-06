@@ -306,6 +306,7 @@ void c8_emulator::Cycle() {
         switch (NN) {
             // may not work correctly. please do
         case 0x07:
+            std::cout << "Set V" << REGISTERS[n2] << " to current delay timer value: " << DELAY_TIMER << "\n";
             REGISTERS[n2] = DELAY_TIMER;
             break;
         case 0x15:
