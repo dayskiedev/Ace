@@ -12,6 +12,7 @@
 // ACE Chip8 Emulator 
 // Brody Watson 2026
 // Ref: https://tobiasvl.github.io/blog/write-a-chip-8-emulator/
+// Ref: http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
 
 // change build structure/initial setup, run cmake -S . -B build
 // to actually build, run cmake --build build
@@ -21,11 +22,26 @@
 
 // constexpr evaluates at compile rather than runtime
 // brace init for type safety (?)
-constexpr int SCREEN_WIDTH { 64 };
-constexpr int SCREEN_HEIGHT { 32 }; 
+constexpr int SCREEN_WIDTH { 1280 };
+constexpr int SCREEN_HEIGHT { 720 }; 
+
+constexpr int EMULATOR_WIDTH { 64 };
+constexpr int EMULATOR_HEIGHT { 32 };
+
+constexpr int EMU_WINDOW_WIDTH { 740 };
+constexpr int EMU_WINDOW_HEIGHT { 420 };
+
+// controls the number of instructions to be executed each second 
+int _instructionsPerSec = 700;
+
+// the number of ticks (for timers) to occur each second
+int _ticksPerSec = 60;
+
+std::string rom = "";
+
 std::string PROGRAM_NAME { "Ace" };
 
-int SCREEN_SCALE { 10 };
+int SCREEN_SCALE { 1 };
 
 SDL_Window* gWindow { nullptr };
 SDL_Renderer* gRenderer { nullptr };
@@ -145,29 +161,33 @@ void CheckForInput(SDL_Event& e, c8_emulator& c8) {
 // tick seperate function for timers? can keep timing seperate to cycle and allows them to run when a cycle is paused for input
 
 int main(int argc, char* args[]){
+    std::cout << "Launching... \n";
     // if(argc <= 1) {
     //     std::cout << "Error, no ROM specified (include the path to ROM in launch) \nClosing...\n";
     //     return -1;
     // }
-
+    // // 
+    // rom = args[1]; 
+    
     // setup SDL
     if(Init() == false) {
         SDL_Log("Unable to init!\n");
         return -1;
     } 
 
+    // the actual emulator and its tools
     c8_emulator emulator;
     c8_utils utils;
 
     // no idea what SDL_PIXELFORMAT_RGBA8888 does...
     // SDL_TEXTUREACCESS_STREAMING = texture changes constantly (it does)
     // when screen width is doubled you gget 2 copies of the texture, when screen height is doubled it crashes..
-    SDL_Texture* videoTexture = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_STREAMING, SCREEN_WIDTH, SCREEN_HEIGHT);
+    SDL_Texture* videoTexture = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_STREAMING, EMULATOR_WIDTH, EMULATOR_HEIGHT);
     SDL_SetTextureScaleMode(videoTexture, SDL_SCALEMODE_PIXELART);
     // look into thiss
-    int video_pitch = sizeof(emulator.VIDEO[0]) * SCREEN_WIDTH;
+    int video_pitch = sizeof(emulator.VIDEO[0]) * EMULATOR_WIDTH;
 
-    std::string rom = "c4";
+    rom = "tetris";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -175,33 +195,26 @@ int main(int argc, char* args[]){
         return -1;
     }
 
-    bool cycle = false;
     int exitCode { 0 };
-    std::cout << "Launching... \n";
-
     bool quit { false }; 
     SDL_Event e;
     SDL_zero( e );
 
-
-    // make this optional CLI args
-    int _instructionPerSec = 700;
-    int _ticksPerSec = 60;
-
-    double insTickSpeed = 1000/_instructionPerSec; // run an instruction every 1.43ms to get 700i/s
+    double insTickSpeed = 1000/_instructionsPerSec; // run an instruction every 1.43ms to get 700i/s
     double insTickCount = 0;
     double tickCount = 0; 
     double tickSpeed = 1000/_ticksPerSec; // run a tick every 16ms so we get 60t/s roughly for timer
     Uint64 NOW = SDL_GetPerformanceCounter();
     Uint64 THEN = 0;
 
-
     double deltatime = 0;
+
+    // we render the emulator to this texture instead of the screen so we can have independent resolution/positioning 
+    SDL_FRect emuRect {SCREEN_WIDTH / 2 - (EMU_WINDOW_WIDTH / 2),SCREEN_HEIGHT/2 - (EMU_WINDOW_HEIGHT / 2), EMU_WINDOW_WIDTH,EMU_WINDOW_HEIGHT};
 
         //The main loop
     while( quit == false )
     {   
-
         // calculate eltatime
         THEN = NOW;
         NOW = SDL_GetPerformanceCounter();
@@ -217,7 +230,6 @@ int main(int argc, char* args[]){
         CheckForInput(e, emulator);
 
         // tick clocks
-
         if(tickCount >= tickSpeed) {
             emulator.Tick();
 
@@ -229,14 +241,6 @@ int main(int argc, char* args[]){
 
         tickCount += deltatime;
 
-
-        // keep a countn that increases to 60?
-        // every 16.6ms run tick
-
-        // run a cycle of emulator
-
-        // shold be around 700 instructions a second
-
         if(insTickCount >= insTickSpeed) {
             emulator.Cycle();
             insTickCount -= insTickSpeed;
@@ -244,23 +248,19 @@ int main(int argc, char* args[]){
 
         insTickCount += deltatime;
 
-
-
-
         // if(e.type == SDL_EVENT_KEY_DOWN) {
-        //     if(e.key.key == SDLK_L) {
-        //         emulator.Cycle();
-        //     } 
-        //     else if (e.key.key == SDLK_K) {
-        //         utils.CheckMemory(emulator.GetMemory(), 0x200, 0x284);
+        //     if(e.key.key == SDLK_K) {
+        //         emuRect.x-=4;
         //     }
+        //     if(e.key.key == SDLK_L) {
+        //         emuRect.x+=4;
+        //     } 
         // }
-        SDL_RenderClear(gRenderer);
-        //SDL_SetRenderDrawColor(gRenderer,0,0,0,0);
-        // copy texture to a rect and render that so its seperate from screen width/height?
-        SDL_UpdateTexture(videoTexture, nullptr, emulator.VIDEO, video_pitch);
-        SDL_RenderTexture(gRenderer, videoTexture, nullptr, nullptr);
 
+        // render
+        SDL_RenderClear(gRenderer);
+        SDL_UpdateTexture(videoTexture, nullptr, emulator.VIDEO, video_pitch);
+        SDL_RenderTexture(gRenderer, videoTexture, nullptr, &emuRect);
         SDL_RenderPresent(gRenderer);
     }
 
