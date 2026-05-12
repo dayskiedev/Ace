@@ -6,6 +6,10 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
+#include "imgui.h"
+#include "imgui_impl_sdl3.h"
+#include "imgui_impl_opengl3.h"
+
 #include "c8_emulator.h"
 #include "c8_utils.h"
 
@@ -58,7 +62,7 @@ bool Init() {
 	std::cout << "SDL initialised" << std::endl;
 
     // Create window (suggess using create window and renderer to avoid flicker?)
-    gWindow = SDL_CreateWindow(PROGRAM_NAME.c_str(), SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_VULKAN);
+    gWindow = SDL_CreateWindow(PROGRAM_NAME.c_str(), SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
     if (gWindow == NULL) {
         std::cout << "Window could not be created!" << std::endl;
         return false;
