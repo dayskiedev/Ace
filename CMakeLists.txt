@@ -1,11 +1,10 @@
 # initial build: cmake -S . -B build
-# then to actually build: cmake --build build
+# cmake --build build     				  < Debug
+# cmake --build build --config Release    < Release (VS build mode)
 # then run with ./build/debug/ace.exe
 
 # ensure they have gcc 
 # ensure they have git
-# check sdl3 dll is installed?
-# need to copy dll to path
 
 cmake_minimum_required(VERSION 3.24)
 
@@ -84,3 +83,13 @@ add_custom_command(
 		${CMAKE_CURRENT_SOURCE_DIR}/Roms
 		$<TARGET_FILE_DIR:ace>/Roms
 )
+
+# copy the SDL lib to source so those without it should be able to run it?
+add_custom_command(
+	TARGET ace
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+		$<TARGET_FILE:SDL3::SDL3>
+		$<TARGET_FILE_DIR:ace>
+)
+
