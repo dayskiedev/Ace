@@ -46,7 +46,7 @@ add_library(imgui
     ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
 
     # renderer backend
-    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp)
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_sdlrenderer3.cpp)
 
 target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}

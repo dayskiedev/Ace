@@ -8,7 +8,7 @@
 
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
-#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdlrenderer3.h"
 
 #include "c8_emulator.h"
 #include "c8_utils.h"
@@ -88,13 +88,15 @@ bool Init() {
 void Close()
 {
     std::cout << "Exiting...\n";
+    ImGui_ImplSDLRenderer3_Shutdown();
+    ImGui_ImplSDL3_Shutdown();
+    ImGui::DestroyContext();
     //Destroy window
     SDL_DestroyWindow( gWindow );
     gWindow = nullptr;
     //Quit SDL subsystems
     SDL_Quit();
 }
-
 
 // we dont want to just set the register whenever
 // we want to wait until we are requesting an input
@@ -179,6 +181,19 @@ int main(int argc, char* args[]){
         return -1;
     } 
 
+    // setup imgui
+    //auto gContext = SDL_GL_CreateContext(gWindow);
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplSDL3_InitForSDLRenderer(gWindow,gRenderer);
+    ImGui_ImplSDLRenderer3_Init(gRenderer);
+
     // the actual emulator and its tools
     c8_emulator emulator;
     c8_utils utils;
@@ -228,6 +243,9 @@ int main(int argc, char* args[]){
         SDL_PollEvent( &e );
         if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
+        // poll imgui
+        ImGui_ImplSDL3_ProcessEvent(&e);
+        
         // match with get perfromance freq?
 
         // check for input
@@ -261,11 +279,32 @@ int main(int argc, char* args[]){
         //     } 
         // }
 
+        // update imgui stuff
+        //(ImGui_ImplOpenGL3_NewFrame)();
+        //ImGui_ImplSDL3_NewFrame();
+        ImGui_ImplSDLRenderer3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::ShowDemoWindow();    
+
+        ImGui::Render();
+
         // render
         SDL_RenderClear(gRenderer);
+
+        // draw emulator to texture
         SDL_UpdateTexture(videoTexture, nullptr, emulator.VIDEO, video_pitch);
+
+        // draw texture to screen
         SDL_RenderTexture(gRenderer, videoTexture, nullptr, &emuRect);
+
+
+        // draw imgui stuff
+        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), gRenderer);
+
         SDL_RenderPresent(gRenderer);
+
     }
 
     Close();
