@@ -206,7 +206,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * EMULATOR_WIDTH;
 
-    rom = "tetris";
+    rom = "bo";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -279,12 +279,16 @@ int main(int argc, char* args[]){
         //Demo
         //ImGui::ShowDemoWindow();
 
+        // MOVE ALL OF THIS TO ITS OWN FILE!
+
         //custom gui stuff
         ImGui::Begin("Chip8 Information", NULL, ImGuiWindowFlags_NoCollapse);
         ImGui::PushFont(NULL, 20);
         ImGui::Text(("Current Rom: " + rom).c_str());
         ImGui::Text(("Program Counter: " + std::to_string(emulator.GetPC())).c_str());
         ImGui::Text(("Index Register: " + std::to_string(emulator.GetIR())).c_str());
+        ImGui::Text(("Tick Count: " + std::to_string(tickCount)).c_str());
+        ImGui::Text(("Instruction Count: " + std::to_string(insTickCount)).c_str());
         ImGui::PopFont();
         ImGui::End();
 
@@ -304,7 +308,9 @@ int main(int argc, char* args[]){
             for(int col = 0; col < 4; ++col) {
                 ImGui::PushFont(NULL, 40);
                 ImGui::TableSetColumnIndex(col);
-                ImGui::Text("V%d: %d", indexCount+1, emulator.GetRV(indexCount));
+
+                // inttohex adds 0 for ease of reasing, but we dont want that here, so we chop it out
+                ImGui::Text("V%s: %d", (utils.IntToHex(indexCount).substr(1,1)).c_str(), emulator.GetRV(indexCount));
                 ImGui::PopFont();
                 indexCount++;
             }
@@ -326,12 +332,27 @@ int main(int argc, char* args[]){
         // }
 
         indexCount = 0;
-        for(int row = 0; row < (emulator.GetRomSize() / 4); ++row) {
+
+        // +1 is to account for offset from romsize being 0 indexed.
+        for(int row = 0; row < (emulator.GetRomSize() / 4) +1; ++row) {
             ImGui::TableNextRow();
             for(int col = 0; col < 4; ++col) {
                 ImGui::TableSetColumnIndex(col);
-                std::string memAsHex = utils.IntToHex(emulator.GetMemoryValue(indexCount + emulator.GetStartAddr()));
-                ImGui::Text(memAsHex.c_str());
+
+                int curMemAdr = indexCount + emulator.GetStartAddr();
+                std::string memAsHex = utils.IntToHex(emulator.GetMemoryValue(curMemAdr));
+
+                // check if current memory index is what the Index Register in our emulator is selecting
+                if(emulator.GetIR() == curMemAdr) {
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
+                    //ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), memAsHex.c_str());
+                }
+                else if(curMemAdr == emulator.GetPC()) {
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
+                    //ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), memAsHex.c_str());
+                } else {
+                    ImGui::Text(memAsHex.c_str());
+                }
                 indexCount++;
             }
         }

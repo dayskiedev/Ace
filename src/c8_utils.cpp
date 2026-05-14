@@ -46,6 +46,6 @@ void c8_utils::CheckMemory(const uint8_t CONST_MEMORY[], int startAddress, int e
 
 std::string c8_utils::IntToHex(int num) {
     std::stringstream stream;
-    stream <<  std::setw(2) << std::hex  << std::setfill('0') << num;
+    stream << std::setw(2) << std::hex  << std::setfill('0') << num;
     return stream.str();
 }
