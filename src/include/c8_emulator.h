@@ -34,6 +34,7 @@ class c8_emulator {
     const int GetPC() { return PROGRAM_COUNTER; }
     const int GetIR() { return INDEX_REGISTER; }
     const int GetRV(int RX) { return REGISTERS[RX]; }
+    const std::stack<uint16_t> GetAS() { return ADDRESS_STACK; } // should be a reference somehow...
 
     // on = 0xFFFFFFFF 
     // off = 0x00000000

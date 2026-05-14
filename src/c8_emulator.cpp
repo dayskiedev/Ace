@@ -248,6 +248,8 @@ void c8_emulator::Cycle() {
         break;
     case 0xD:
         //std::cout << "Display/Draw\n";
+
+        // keep these unchanged?
         X = REGISTERS[n2] % 64;
         Y = REGISTERS[n3] % 32;
         REGISTERS[15] = 0;

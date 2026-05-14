@@ -206,7 +206,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * EMULATOR_WIDTH;
 
-    rom = "bo";
+    rom = "to";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -248,14 +248,14 @@ int main(int argc, char* args[]){
         CheckForInput(e, emulator);
 
         // tick clocks
-        if(tickCount >= tickSpeed) {
+        while(tickCount >= tickSpeed) {
             emulator.Tick();
             tickCount -= tickSpeed;
         }
 
         tickCount += deltatime;
 
-        if(insTickCount >= insTickSpeed) {
+        while(insTickCount >= insTickSpeed) {
             emulator.Cycle();
             insTickCount -= insTickSpeed;
         }
@@ -285,12 +285,22 @@ int main(int argc, char* args[]){
         ImGui::Begin("Chip8 Information", NULL, ImGuiWindowFlags_NoCollapse);
         ImGui::PushFont(NULL, 20);
         ImGui::Text(("Current Rom: " + rom).c_str());
-        ImGui::Text(("Program Counter: " + std::to_string(emulator.GetPC())).c_str());
-        ImGui::Text(("Index Register: " + std::to_string(emulator.GetIR())).c_str());
+        ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), ("Program Counter: " + std::to_string(emulator.GetPC())).c_str());
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), ("Index Register: " + std::to_string(emulator.GetIR())).c_str());
         ImGui::Text(("Tick Count: " + std::to_string(tickCount)).c_str());
         ImGui::Text(("Instruction Count: " + std::to_string(insTickCount)).c_str());
         ImGui::PopFont();
         ImGui::End();
+
+        ImGui::Begin("Address Stack", NULL, ImGuiWindowFlags_NoCollapse);
+        std::stack<uint16_t> stack_addr_ref = emulator.GetAS();
+        while (!stack_addr_ref.empty())
+        {
+            ImGui::Text(utils.IntToHex(stack_addr_ref.top()).c_str());
+            stack_addr_ref.pop();
+        }
+        ImGui::End();
+        
 
         ImGui::Begin("ACE Information", NULL, ImGuiWindowFlags_NoCollapse);
         ImGui::PushFont(NULL, 18);
