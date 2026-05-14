@@ -19,8 +19,6 @@ class c8_emulator {
     bool Startup(std::string path_to_rom);
 
     void Cycle();
-
-    // should run at 60hz
     void Tick();
 
     // set register value from input 
@@ -28,8 +26,14 @@ class c8_emulator {
 
     // read-only veiw of all memory
     const uint8_t* GetMemory() { return MEMORY; }
+    const uint8_t GetMemoryValue(int addr) { return MEMORY[addr]; }
+
     const int GetRomSize() { return romSize; }
     const int GetStartAddr() { return START_ADR; }
+    
+    const int GetPC() { return PROGRAM_COUNTER; }
+    const int GetIR() { return INDEX_REGISTER; }
+    const int GetRV(int RX) { return REGISTERS[RX]; }
 
     // on = 0xFFFFFFFF 
     // off = 0x00000000

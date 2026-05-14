@@ -32,8 +32,8 @@ constexpr int SCREEN_HEIGHT { 720 };
 constexpr int EMULATOR_WIDTH { 64 };
 constexpr int EMULATOR_HEIGHT { 32 };
 
-constexpr int EMU_WINDOW_WIDTH { 740 };
-constexpr int EMU_WINDOW_HEIGHT { 420 };
+constexpr int EMU_WINDOW_WIDTH { 640 };
+constexpr int EMU_WINDOW_HEIGHT { 320 };
 
 // controls the number of instructions to be executed each second 
 int _instructionsPerSec = 700;
@@ -229,7 +229,7 @@ int main(int argc, char* args[]){
     double deltatime = 0;
 
     // we render the emulator to this texture instead of the screen so we can have independent resolution/positioning 
-    SDL_FRect emuRect {SCREEN_WIDTH / 2 - (EMU_WINDOW_WIDTH / 2),SCREEN_HEIGHT/2 - (EMU_WINDOW_HEIGHT / 2), EMU_WINDOW_WIDTH,EMU_WINDOW_HEIGHT};
+    SDL_FRect emuRect {SCREEN_WIDTH / 2 - (EMU_WINDOW_WIDTH / 2),0, EMU_WINDOW_WIDTH,EMU_WINDOW_HEIGHT};
 
         //The main loop
     while( quit == false )
@@ -245,19 +245,11 @@ int main(int argc, char* args[]){
 
         // poll imgui
         ImGui_ImplSDL3_ProcessEvent(&e);
-        
-        // match with get perfromance freq?
-
-        // check for input
         CheckForInput(e, emulator);
 
         // tick clocks
         if(tickCount >= tickSpeed) {
             emulator.Tick();
-
-            //std::cout << "Tick\n";
-
-            // we want to keep any overlapping frames to keep it steady
             tickCount -= tickSpeed;
         }
 
@@ -280,18 +272,75 @@ int main(int argc, char* args[]){
         // }
 
         // update imgui stuff
-        //(ImGui_ImplOpenGL3_NewFrame)();
-        //ImGui_ImplSDL3_NewFrame();
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::ShowDemoWindow();    
+        //Demo
+        //ImGui::ShowDemoWindow();
 
-        ImGui::Render();
+        //custom gui stuff
+        ImGui::Begin("Chip8 Information", NULL, ImGuiWindowFlags_NoCollapse);
+        ImGui::PushFont(NULL, 20);
+        ImGui::Text(("Current Rom: " + rom).c_str());
+        ImGui::Text(("Program Counter: " + std::to_string(emulator.GetPC())).c_str());
+        ImGui::Text(("Index Register: " + std::to_string(emulator.GetIR())).c_str());
+        ImGui::PopFont();
+        ImGui::End();
+
+        ImGui::Begin("ACE Information", NULL, ImGuiWindowFlags_NoCollapse);
+        ImGui::PushFont(NULL, 18);
+        ImGui::Text("Window Resolution: %dX%d", SCREEN_WIDTH, SCREEN_HEIGHT);
+        ImGui::Text("Emulator Resolution: %dX%d", EMU_WINDOW_WIDTH, EMU_WINDOW_HEIGHT);
+        ImGui::PopFont();
+        ImGui::End();
+
+        int indexCount = 0;
+        
+        ImGui::Begin("Chip8 Registers", NULL, ImGuiWindowFlags_NoCollapse);
+        ImGui::BeginTable("Registers", 4);    
+        for(int row = 0; row < 4; ++row) {
+            ImGui::TableNextRow();
+            for(int col = 0; col < 4; ++col) {
+                ImGui::PushFont(NULL, 40);
+                ImGui::TableSetColumnIndex(col);
+                ImGui::Text("V%d: %d", indexCount+1, emulator.GetRV(indexCount));
+                ImGui::PopFont();
+                indexCount++;
+            }
+        }
+        ImGui::EndTable();
+        ImGui::End();
+
+        // 0 1 2 3
+        // 4 5 6
+
+        ImGui::Begin("Rom Memory", NULL, ImGuiWindowFlags_NoCollapse);
+        ImGui::BeginTable("Memory", 4);    
+        // for(int row = 0; row < 4; ++row) {
+        //     ImGui::TableNextRow();
+        //     for(int col = 0; col < 4; ++col) {
+        //         ImGui::TableSetColumnIndex(col);
+        //         ImGui::Text(std::to_string(row + (col * 4) + 512).c_str());
+        //     }
+        // }
+
+        indexCount = 0;
+        for(int row = 0; row < (emulator.GetRomSize() / 4); ++row) {
+            ImGui::TableNextRow();
+            for(int col = 0; col < 4; ++col) {
+                ImGui::TableSetColumnIndex(col);
+                std::string memAsHex = utils.IntToHex(emulator.GetMemoryValue(indexCount + emulator.GetStartAddr()));
+                ImGui::Text(memAsHex.c_str());
+                indexCount++;
+            }
+        }
+        ImGui::EndTable();
+        ImGui::End();
 
         // render
         SDL_RenderClear(gRenderer);
+        ImGui::Render();
 
         // draw emulator to texture
         SDL_UpdateTexture(videoTexture, nullptr, emulator.VIDEO, video_pitch);
@@ -304,6 +353,7 @@ int main(int argc, char* args[]){
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), gRenderer);
 
         SDL_RenderPresent(gRenderer);
+
 
     }
 

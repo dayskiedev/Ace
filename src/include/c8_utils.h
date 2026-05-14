@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <bitset>
+#include <sstream>
 #include <iomanip>
 
 // store a reference to emulator to peek memory / do other stuff
@@ -16,7 +17,7 @@ class c8_utils {
         void CheckMemory(const uint8_t CONST_MEMORY[], uint8_t startAddress);
         void CheckMemory(const uint8_t CONST_MEMORY[], int startAddress, int endAddress);
 
-
+        std::string IntToHex(int num);
 };
 
 #endif
