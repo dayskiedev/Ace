@@ -47,6 +47,8 @@ std::string PROGRAM_NAME { "Ace" };
 
 int SCREEN_SCALE { 1 };
 
+bool Pause = false;
+
 SDL_Window* gWindow { nullptr };
 SDL_Renderer* gRenderer { nullptr };
 
@@ -206,7 +208,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * EMULATOR_WIDTH;
 
-    rom = "to";
+    rom = "tetris";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -245,31 +247,37 @@ int main(int argc, char* args[]){
 
         // poll imgui
         ImGui_ImplSDL3_ProcessEvent(&e);
-        CheckForInput(e, emulator);
 
-        // tick clocks
-        while(tickCount >= tickSpeed) {
-            emulator.Tick();
-            tickCount -= tickSpeed;
+        if(!Pause) {
+            CheckForInput(e, emulator);
+
+
+            // tick clocks
+            while(tickCount >= tickSpeed) {
+                emulator.Tick();
+                tickCount -= tickSpeed;
+            }
+
+            tickCount += deltatime;
+
+            while(insTickCount >= insTickSpeed) {
+                emulator.Cycle();
+                insTickCount -= insTickSpeed;
+            }
+
+            insTickCount += deltatime;
         }
 
-        tickCount += deltatime;
-
-        while(insTickCount >= insTickSpeed) {
-            emulator.Cycle();
-            insTickCount -= insTickSpeed;
-        }
-
-        insTickCount += deltatime;
-
-        // if(e.type == SDL_EVENT_KEY_DOWN) {
-        //     if(e.key.key == SDLK_K) {
-        //         emuRect.x-=4;
-        //     }
-        //     if(e.key.key == SDLK_L) {
-        //         emuRect.x+=4;
-        //     } 
-        // }
+        if(e.type == SDL_EVENT_KEY_DOWN) {
+            if(e.key.key == SDLK_P) {
+                Pause = !Pause;
+            }
+            else if(e.key.key == SDLK_O) {
+                Pause = true;
+                emulator.Startup(path_to_rom);
+                Pause = false;
+            }
+        } 
 
         // update imgui stuff
         ImGui_ImplSDLRenderer3_NewFrame();
@@ -311,14 +319,13 @@ int main(int argc, char* args[]){
 
         int indexCount = 0;
         
-        ImGui::Begin("Chip8 Registers", NULL, ImGuiWindowFlags_NoCollapse);
+        ImGui::Begin("Registers", NULL, ImGuiWindowFlags_NoCollapse);
         ImGui::BeginTable("Registers", 4);    
         for(int row = 0; row < 4; ++row) {
             ImGui::TableNextRow();
             for(int col = 0; col < 4; ++col) {
                 ImGui::PushFont(NULL, 40);
                 ImGui::TableSetColumnIndex(col);
-
                 // inttohex adds 0 for ease of reasing, but we dont want that here, so we chop it out
                 ImGui::Text("V%s: %d", (utils.IntToHex(indexCount).substr(1,1)).c_str(), emulator.GetRV(indexCount));
                 ImGui::PopFont();
@@ -355,9 +362,13 @@ int main(int argc, char* args[]){
                 // check if current memory index is what the Index Register in our emulator is selecting
                 if(emulator.GetIR() == curMemAdr) {
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
+                    ImGui::TableSetColumnIndex(col+1);
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
                     //ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), memAsHex.c_str());
                 }
                 else if(curMemAdr == emulator.GetPC()) {
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
+                    ImGui::TableSetColumnIndex(col+1);
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
                     //ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), memAsHex.c_str());
                 } else {

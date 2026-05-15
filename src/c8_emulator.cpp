@@ -1,11 +1,22 @@
 #include "c8_emulator.h"
 
 bool c8_emulator::Startup(std::string path_to_rom) {
+    // ensure memory is clean
+    std::fill(MEMORY, MEMORY+4096, 0);
+    // Ensure screen is clear
+    std::fill(VIDEO, VIDEO+((64*32)), PIXEL_OFF);
+    // Ensure register is clear
+    std::fill(REGISTERS, REGISTERS+16, 0);
+    // Ensure Address Stack is clear
+    ADDRESS_STACK = {};
+
     // load font into memory from addr 050 (80)
     for(uint8_t i = 0; i < fontStartAddr; ++i) {
         // offset memory addr by fontstartAddr value to be where we want to begin.
         MEMORY[i + fontStartAddr] = FONT[i];
     }
+
+    
 
     // next we attempt to load a rom from the specified path
     std::cout << "Input path: " << path_to_rom << std::endl;
@@ -258,7 +269,7 @@ void c8_emulator::Cycle() {
             uint8_t spriteData = MEMORY[INDEX_REGISTER + i];
             for(int b = 0; b < 8; ++b) {
                 // scroll guard if we reach over 64, we don't want to draw anything (may cause issues...)
-                //if(X >= 64) { break; } 
+                if(X >= 64) { break; } 
 
                 // get most significant bit from spirteData, move it to first index so its either 1 or 0
                 uint8_t bit = (spriteData & 0x80) >> 7;
@@ -283,9 +294,10 @@ void c8_emulator::Cycle() {
             }
             Y++;
             X = REGISTERS[n2] % 64;
-            // if(Y > 32) {
-            //     break;
-            // }
+
+            if(Y > 32) {
+                break;
+            }
 
         }
         break;
