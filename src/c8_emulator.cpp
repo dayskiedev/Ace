@@ -265,36 +265,22 @@ void c8_emulator::Cycle() {
         Y = REGISTERS[n3] % 32;
         REGISTERS[15] = 0;
 
-        for(uint16_t i = 0; i < N; i++) {
-            uint8_t spriteData = MEMORY[INDEX_REGISTER + i];
-            for(int b = 0; b < 8; ++b) {
-                // scroll guard if we reach over 64, we don't want to draw anything (may cause issues...)
-                //if(X >= 64) { break; } 
+        for(int row = 0; row < N; ++row) {
+            uint8_t spriteData = MEMORY[INDEX_REGISTER + row];
+            for(int col = 0; col < 8; ++col) {
+                // shift vy col, so when its 0 we get first elm (0 shift)
+                // then we get second element, shifted by one, etc etc
+                uint8_t bit = spriteData & (0x80 >> col);
+                int screenPos = (Y+ row) * 64 + (X + col);
 
-                // get most significant bit from spirteData, move it to first index so its either 1 or 0
-                uint8_t bit = (spriteData & 0x80) >> 7;
+                if(bit) {
+                    if(VIDEO[screenPos] == PIXEL_ON) {
+                        REGISTERS[15] = 1;
+                    }
 
-                // move next bit to most significant position
-                spriteData <<= 1; // shift left by 1
-
-                // convert 2d coords to 1D array, (Y just tells us the row number to search for where x points to the col)
-                int position = X + (Y * 64); 
-                
-                // probably a better way to do this?
-                // XOR FF = false, TT = false, TF = True, FT = true
-                if(bit == 1) {
-                    if(VIDEO[position] == PIXEL_ON) {
-                        // fade out
-                        //VIDEO[position] = PIXEL_OFF;
-                        REGISTERS[15] = 1; // set vf to 1
-                    } 
-                    VIDEO[position] ^= PIXEL_ON;
-                } 
-                X++;
+                    VIDEO[screenPos] ^= PIXEL_ON;
+                }
             }
-            Y++;
-            X = REGISTERS[n2] % 64;
-
         }
         break;
     case 0xE:
