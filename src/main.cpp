@@ -208,7 +208,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * EMULATOR_WIDTH;
 
-    rom = "down8";
+    rom = "tetris";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -250,8 +250,6 @@ int main(int argc, char* args[]){
 
         if(!Pause) {
             CheckForInput(e, emulator);
-
-
             // tick clocks
             while(tickCount >= tickSpeed) {
                 emulator.Tick();

@@ -208,19 +208,22 @@ void c8_emulator::Cycle() {
         case 0x5:
             std::cout << "Set V" << std::hex << n2 << " To itself minus V" << n3 << "\n";
             // check for underflow, set vf flag if this occurs
-            REGISTERS[15] = 1;
-            if(REGISTERS[n2] < REGISTERS[n3]) { REGISTERS[15] = 0; }
+            REGISTERS[15] = 0;
+            if(REGISTERS[n2] >= REGISTERS[n3]) { REGISTERS[15] = 1; }
             REGISTERS[n2] -= REGISTERS[n3];
             break;
         case 0x6:
             // put the value of vy int vx should be configurable
             std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the right)\n"; 
-            REGISTERS[n2] = REGISTERS[n3];
+            
+            // check c8_emulator.h for an explanation
+            if(_USE_OLD_BIT_SHIFT) { REGISTERS[n2] = REGISTERS[n3]; }
+
             // set vf to the first bit (which will be shifted out)
             REGISTERS[15] = REGISTERS[n2] & 0x1;
             REGISTERS[n2] >>= 1;
             break;
-        case 0x7:
+        case 0x7:   
             std::cout << "Set V" << std::hex << n2 << " To V" << n3 << " minus itself\n";
             REGISTERS[15] = 1;
             if(REGISTERS[n3] < REGISTERS[n2]) { REGISTERS[15] = 0; }
@@ -228,8 +231,8 @@ void c8_emulator::Cycle() {
             break;
         case 0xE:
             std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the left)\n"; 
-            // this should be optional 
-            REGISTERS[n2] = REGISTERS[n3];
+            // check c8_emulator.h for an explanation
+            if(_USE_OLD_BIT_SHIFT) { REGISTERS[n2] = REGISTERS[n3]; }
             // get left most bit 
             REGISTERS[15] = (REGISTERS[n2] & 0x80) >> 7; 
             REGISTERS[n2] <<=1;
@@ -251,11 +254,24 @@ void c8_emulator::Cycle() {
         std::cout  << "Set index register I to " << std::hex << NNN << std::dec << "\n";
         INDEX_REGISTER = NNN;
         break;
+    case 0xB:
+        std::cout << "Jump with offset\n";
+        // super chip: jump to address xnn + reg[vx]
+        // old ver: just jump to nnn + reg[0]
+
+        // see c8_emulator.h for explanation
+        if(_USE_OLD_JUMP_WITH_OFFSET) {
+            PROGRAM_COUNTER = REGISTERS[0] + NNN;
+        } else {
+            PROGRAM_COUNTER = NNN + REGISTERS[n2];
+        }
+
+        break;
     case 0xC:
         // this also may indicate an end of file.
         std::cout << "Generate a random number, AND it with " << NN << " and place in register VX\n";
         // this random value may not be fully random each time?
-        REGISTERS[n2] = NN &  (std::rand() % 128);
+        REGISTERS[n2] = NN & (std::rand() % 255);
         break;
     case 0xD:
         std::cout << "Display/Draw\n";
@@ -267,11 +283,16 @@ void c8_emulator::Cycle() {
 
         for(int row = 0; row < N; ++row) {
             uint8_t spriteData = MEMORY[INDEX_REGISTER + row];
+
+            if(Y + row >= 32) { break; }
+
             for(int col = 0; col < 8; ++col) {
                 // shift vy col, so when its 0 we get first elm (0 shift)
                 // then we get second element, shifted by one, etc etc
                 uint8_t bit = spriteData & (0x80 >> col);
                 int screenPos = (Y+ row) * 64 + (X + col);
+
+                if(X + col >= 64) { continue; } 
 
                 if(bit) {
                     if(VIDEO[screenPos] == PIXEL_ON) {
@@ -287,14 +308,14 @@ void c8_emulator::Cycle() {
         switch (NN) {
             case 0x9E:
                 // skip one instruction (+2) if the key corresponding to vx is being pressed
-                //std::cout << "Skip one instruction if input value is equal to V" << (int)REGISTERS[n2] << "\n";
+                std::cout << "Skip one instruction if input value is equal to V" << (int)REGISTERS[n2] << "\n";
                 if(INPUT_VALUE == REGISTERS[n2]) {
                     PROGRAM_COUNTER += 2;
                 }
                 break;
             case 0xA1:
                 // skp one instruction if key corresponding to vx is NOT pressed
-                //std::cout << "Skip one instruction if input value is NOT equal to V" << (int)REGISTERS[n2] << "\n";
+                std::cout << "Skip one instruction if input value is NOT equal to V" << (int)REGISTERS[n2] << "\n";
                 if(INPUT_VALUE != REGISTERS[n2]) {
                     PROGRAM_COUNTER += 2;
                 }
@@ -307,15 +328,15 @@ void c8_emulator::Cycle() {
         switch (NN) {
             // may not work correctly. please do
         case 0x07:
-            std::cout << "Set V" << (int)REGISTERS[n2] << " to current delay timer value: " << (int)DELAY_TIMER << "\n";
+            std::cout << "Set V" << (int)n2 << " to current delay timer value: " << (int)DELAY_TIMER << "\n";
             REGISTERS[n2] = DELAY_TIMER;
             break;
         case 0x15:
-            std::cout << "Set delay timer to value in V" << (int)REGISTERS[n2] << "\n";
+            std::cout << "Set delay timer to value in V" << (int)n2 << "\n";
             DELAY_TIMER = REGISTERS[n2];
             break;
         case 0x18:
-            std::cout << "Set sound timer to value in V" << (int)REGISTERS[n2] << "\n";
+            std::cout << "Set sound timer to value in V" << (int)n2 << "\n";
             SOUND_TIMER = REGISTERS[n2];
             break;  
         case 0x1E:
@@ -347,18 +368,23 @@ void c8_emulator::Cycle() {
             break;
         // store and load memory
         case 0x55:
-            std::cout << "allocating valuea from memory to register V0 -> V" << (int)n2 << "\n";
+            std::cout << "allocating valuea from register to memory\n";
             for(int i = 0; i <= n2; ++i) {
                 //std::cout << "allocating value " << (int)n2 << " to register " << i << std::endl;
                 MEMORY[INDEX_REGISTER+i] = REGISTERS[i];
             }
+
+            // Check c8_emulator.h for explination
+            if(_USE_OLD_MEMORY_STORE_LOAD) { INDEX_REGISTER += n2 + 1; }
             break;
         case 0x65:
-            std::cout << "allocating valuea from registers V0 -> V" << (int)n2 << " into memory\n";
+            std::cout << "allocating valuea from memory to registers V0 -> V" << (int)n2 << "\n";
             for(int i = 0; i <= n2; ++i) {
                 //std::cout << "allocating register value " << (int)n2 << " to memory index " << i << std::endl;
                 REGISTERS[i] = MEMORY[INDEX_REGISTER+i];
             }
+
+            if(_USE_OLD_MEMORY_STORE_LOAD) { INDEX_REGISTER += n2 + 1; }
             break;
 
         default:
