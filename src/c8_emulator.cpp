@@ -111,6 +111,7 @@ void c8_emulator::Cycle() {
     // 0x8XY8 made as 16bit so it can store value if it goes over the limit
     uint16_t addValue;
 
+    uint8_t flag;
     //std::cout << n1 << "|" << n2 << "|" << n3 << "|" << n4 << std::endl;
     //std::cout << "Raw opcode: " << std::hex << "0x" << std::uppercase << std::setw(4) << std::setfill('0') << opcode << std::dec << " | ";   
     
@@ -208,9 +209,9 @@ void c8_emulator::Cycle() {
         case 0x5:
             //std::cout << "Set V" << std::hex << n2 << " To itself minus V" << n3 << "\n";
             // check for underflow, set vf flag if this occurs
-            REGISTERS[15] = 0;
-            if(REGISTERS[n2] >= REGISTERS[n3]) { REGISTERS[15] = 1; }
+            flag = (REGISTERS[n2] >= REGISTERS[n3] ? 1 : 0);
             REGISTERS[n2] -= REGISTERS[n3];
+            REGISTERS[15] = flag;
             break;
         case 0x6:
             // put the value of vy int vx should be configurable
@@ -225,9 +226,9 @@ void c8_emulator::Cycle() {
             break;
         case 0x7:   
             //std::cout << "Set V" << std::hex << n2 << " To V" << n3 << " minus itself\n";
-            REGISTERS[15] = 1;
-            if(REGISTERS[n3] < REGISTERS[n2]) { REGISTERS[15] = 0; }
+            flag = (REGISTERS[n3] >= REGISTERS[n2] ? 1 : 0);
             REGISTERS[n2] = REGISTERS[n3] - REGISTERS[n2];
+            REGISTERS[15] = flag;
             break;
         case 0xE:
             //std::cout << "Set V" << std::hex << n2 << " to V" << n3 << "(should be toggled, and shift by 1 to the left)\n"; 
@@ -271,7 +272,7 @@ void c8_emulator::Cycle() {
         // this also may indicate an end of file.
         //std::cout << "Generate a random number, AND it with " << NN << " and place in register VX\n";
         // this random value may not be fully random each time?
-        REGISTERS[n2] = NN & (std::rand() % 255);
+        REGISTERS[n2] = NN & (std::rand() % 256);
         break;
     case 0xD:
         //std::cout << "Display/Draw\n";

@@ -33,7 +33,7 @@ constexpr int EMU_WINDOW_WIDTH { 640 };
 constexpr int EMU_WINDOW_HEIGHT { 320 };
 
 // controls the number of instructions to be executed each second 
-int _instructionsPerSec = 700;
+int _instructionsPerSec = 1000;
 
 // the number of ticks (for timers) to occur each second
 int _ticksPerSec = 60;
@@ -268,19 +268,13 @@ int main(int argc, char* args[]){
 
         // render
         SDL_RenderClear(gRenderer);
-
-        // draw emulator to texture
         SDL_UpdateTexture(videoTexture, nullptr, emulator.VIDEO, video_pitch);
-
-        // draw texture to screen
         SDL_RenderTexture(gRenderer, videoTexture, nullptr, &emuRect);
 
         // draw imgui stuff
         debug_gui.Render(gRenderer);
 
         SDL_RenderPresent(gRenderer);
-
-
     }
 
     // try move to close?

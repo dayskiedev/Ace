@@ -68,6 +68,7 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator) 
                 ImGui::PushFont(NULL, 40);
                 ImGui::TableSetColumnIndex(col);
                 // inttohex adds 0 for ease of reasing, but we dont want that here, so we chop it out
+            
                 ImGui::Text("V%s: %d", (utils.IntToHex(indexCount).substr(1,1)).c_str(), emulator.GetRV(indexCount));
                 ImGui::PopFont();
                 indexCount++;
@@ -103,14 +104,16 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator) 
                 // check if current memory index is what the Index Register in our emulator is selecting
                 if(emulator.GetIR() == curMemAdr) {
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
-                    //ImGui::TableSetColumnIndex(col+1);
-                    //ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
+                    if(col == 3 ) { continue;}
+                    ImGui::TableSetColumnIndex(col+1);
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
                     //ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), memAsHex.c_str());
                 }
                 else if(curMemAdr == emulator.GetPC()) {
                     ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
-                    //ImGui::TableSetColumnIndex(col+1);
-                    //ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
+                    if(col == 3 ) { continue;}
+                    ImGui::TableSetColumnIndex(col+1);
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
                     //ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), memAsHex.c_str());
                 } else {
                     ImGui::Text(memAsHex.c_str());
