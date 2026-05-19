@@ -60,6 +60,7 @@ target_sources(ace
     	src/main.cpp
 		src/c8_emulator.cpp
 		src/c8_utils.cpp
+		src/debug_display.cpp
 	PUBLIC 
 		FILE_SET HEADERS
 		BASE_DIRS
@@ -68,6 +69,7 @@ target_sources(ace
 			src/include/c8_emulator.h
 			src/include/c8_font.h
 			src/include/c8_utils.h
+			src/include/debug_display.h
 )
 
 # link SDL3 (SDL3 provides a Cmake target, imgui doesnt)

@@ -6,12 +6,9 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include "imgui.h"
-#include "imgui_impl_sdl3.h"
-#include "imgui_impl_sdlrenderer3.h"
-
 #include "c8_emulator.h"
 #include "c8_utils.h"
+#include "debug_display.h"
 
 // ACE Chip8 Emulator 
 // Brody Watson 2026
@@ -90,9 +87,6 @@ bool Init() {
 void Close()
 {
     std::cout << "Exiting...\n";
-    ImGui_ImplSDLRenderer3_Shutdown();
-    ImGui_ImplSDL3_Shutdown();
-    ImGui::DestroyContext();
     //Destroy window
     SDL_DestroyWindow( gWindow );
     gWindow = nullptr;
@@ -178,27 +172,20 @@ int main(int argc, char* args[]){
     // rom = args[1]; 
     
     // setup SDL
-    if(Init() == false) {
+    if(!Init()) {
         SDL_Log("Unable to init!\n");
         return -1;
     } 
 
-    // setup imgui
-    //auto gContext = SDL_GL_CreateContext(gWindow);
-
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplSDL3_InitForSDLRenderer(gWindow,gRenderer);
-    ImGui_ImplSDLRenderer3_Init(gRenderer);
-
     // the actual emulator and its tools
     c8_emulator emulator;
     c8_utils utils;
+    debug_display debug_gui;
+
+    if(!debug_gui.Init(gWindow, gRenderer)) {
+        SDL_Log("Unable to init Dear Imgui!\n");
+        return -1;
+    }
 
     // no idea what SDL_PIXELFORMAT_RGBA8888 does...
     // SDL_TEXTUREACCESS_STREAMING = texture changes constantly (it does)
@@ -208,7 +195,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * EMULATOR_WIDTH;
 
-    rom = "tetris";
+    rom = "to";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
@@ -245,9 +232,10 @@ int main(int argc, char* args[]){
         SDL_PollEvent( &e );
         if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
-        // poll imgui
-        ImGui_ImplSDL3_ProcessEvent(&e);
+        // update imgui
+        debug_gui.Update(e, utils, emulator);
 
+        // emulator update
         if(!Pause) {
             CheckForInput(e, emulator);
             // tick clocks
@@ -277,110 +265,9 @@ int main(int argc, char* args[]){
             }
         } 
 
-        // update imgui stuff
-        ImGui_ImplSDLRenderer3_NewFrame();
-        ImGui_ImplSDL3_NewFrame();
-        ImGui::NewFrame();
-
-        //Demo
-        //ImGui::ShowDemoWindow();
-
-        // MOVE ALL OF THIS TO ITS OWN FILE!
-
-        //custom gui stuff
-        ImGui::Begin("Chip8 Information", NULL, ImGuiWindowFlags_NoCollapse);
-        ImGui::PushFont(NULL, 20);
-        ImGui::Text(("Current Rom: " + rom).c_str());
-        ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), ("Program Counter: " + std::to_string(emulator.GetPC())).c_str());
-        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), ("Index Register: " + std::to_string(emulator.GetIR())).c_str());
-        ImGui::Text(("Tick Count: " + std::to_string(tickCount)).c_str());
-        ImGui::Text(("Instruction Count: " + std::to_string(insTickCount)).c_str());
-        ImGui::PopFont();
-        ImGui::End();
-
-        ImGui::Begin("Address Stack", NULL, ImGuiWindowFlags_NoCollapse);
-        std::stack<uint16_t> stack_addr_ref = emulator.GetAS();
-        while (!stack_addr_ref.empty())
-        {
-            ImGui::Text(utils.IntToHex(stack_addr_ref.top()).c_str());
-            stack_addr_ref.pop();
-        }
-        ImGui::End();
-        
-
-        ImGui::Begin("ACE Information", NULL, ImGuiWindowFlags_NoCollapse);
-        ImGui::PushFont(NULL, 18);
-        ImGui::Text("Window Resolution: %dX%d", SCREEN_WIDTH, SCREEN_HEIGHT);
-        ImGui::Text("Emulator Resolution: %dX%d", EMU_WINDOW_WIDTH, EMU_WINDOW_HEIGHT);
-        ImGui::PopFont();
-        ImGui::End();
-
-        int indexCount = 0;
-        
-        ImGui::Begin("Registers", NULL, ImGuiWindowFlags_NoCollapse);
-        ImGui::BeginTable("Registers", 4);    
-        for(int row = 0; row < 4; ++row) {
-            ImGui::TableNextRow();
-            for(int col = 0; col < 4; ++col) {
-                ImGui::PushFont(NULL, 40);
-                ImGui::TableSetColumnIndex(col);
-                // inttohex adds 0 for ease of reasing, but we dont want that here, so we chop it out
-                ImGui::Text("V%s: %d", (utils.IntToHex(indexCount).substr(1,1)).c_str(), emulator.GetRV(indexCount));
-                ImGui::PopFont();
-                indexCount++;
-            }
-        }
-        ImGui::EndTable();
-        ImGui::End();
-
-        // 0 1 2 3
-        // 4 5 6
-
-        ImGui::Begin("Rom Memory", NULL, ImGuiWindowFlags_NoCollapse);
-        ImGui::BeginTable("Memory", 4);    
-        // for(int row = 0; row < 4; ++row) {
-        //     ImGui::TableNextRow();
-        //     for(int col = 0; col < 4; ++col) {
-        //         ImGui::TableSetColumnIndex(col);
-        //         ImGui::Text(std::to_string(row + (col * 4) + 512).c_str());
-        //     }
-        // }
-
-        indexCount = 0;
-
-        // +1 is to account for offset from romsize being 0 indexed.
-        for(int row = 0; row < (emulator.GetRomSize() / 4) +1; ++row) {
-            ImGui::TableNextRow();
-            for(int col = 0; col < 4; ++col) {
-                ImGui::TableSetColumnIndex(col);
-
-                int curMemAdr = indexCount + emulator.GetStartAddr();
-                std::string memAsHex = utils.IntToHex(emulator.GetMemoryValue(curMemAdr));
-
-                // check if current memory index is what the Index Register in our emulator is selecting
-                if(emulator.GetIR() == curMemAdr) {
-                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
-                    //ImGui::TableSetColumnIndex(col+1);
-                    //ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)));
-                    //ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), memAsHex.c_str());
-                }
-                else if(curMemAdr == emulator.GetPC()) {
-                    ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
-                    //ImGui::TableSetColumnIndex(col+1);
-                    //ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, ImGui::GetColorU32(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
-                    //ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), memAsHex.c_str());
-                } else {
-                    ImGui::Text(memAsHex.c_str());
-                }
-                indexCount++;
-            }
-        }
-        ImGui::EndTable();
-        ImGui::End();
 
         // render
         SDL_RenderClear(gRenderer);
-        ImGui::Render();
 
         // draw emulator to texture
         SDL_UpdateTexture(videoTexture, nullptr, emulator.VIDEO, video_pitch);
@@ -388,15 +275,16 @@ int main(int argc, char* args[]){
         // draw texture to screen
         SDL_RenderTexture(gRenderer, videoTexture, nullptr, &emuRect);
 
-
         // draw imgui stuff
-        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), gRenderer);
+        debug_gui.Render(gRenderer);
 
         SDL_RenderPresent(gRenderer);
 
 
     }
 
+    // try move to close?
+    debug_gui.Close();
     Close();
 
     return exitCode;
