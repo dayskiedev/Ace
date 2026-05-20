@@ -16,7 +16,6 @@ bool c8_emulator::Startup(std::string path_to_rom) {
         MEMORY[i + fontStartAddr] = FONT[i];
     }
 
-    
 
     // next we attempt to load a rom from the specified path
     std::cout << "Input path: " << path_to_rom << std::endl;
@@ -80,7 +79,7 @@ void c8_emulator::Cycle() {
     uint16_t opcode = MEMORY[PROGRAM_COUNTER];
 
     if(PROGRAM_COUNTER > START_ADR + romSize) {
-        std::cout << "Outside ROM Memory, terminate program.\n";
+        //std::cout << "Outside ROM Memory, terminate program.\n";
         return;
     }
 

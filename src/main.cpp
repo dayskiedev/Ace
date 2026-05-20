@@ -33,7 +33,7 @@ constexpr int EMU_WINDOW_WIDTH { 640 };
 constexpr int EMU_WINDOW_HEIGHT { 320 };
 
 // controls the number of instructions to be executed each second 
-int _instructionsPerSec = 1000;
+int _instructionsPerSec = 700;
 
 // the number of ticks (for timers) to occur each second
 int _ticksPerSec = 60;
@@ -233,7 +233,7 @@ int main(int argc, char* args[]){
         if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
         // update imgui
-        debug_gui.Update(e, utils, emulator);
+        debug_gui.Update(e, utils, emulator, Pause, path_to_rom);
 
         // emulator update
         if(!Pause) {

@@ -16,7 +16,7 @@ bool debug_display::Init(SDL_Window* _window, SDL_Renderer* _renderer) {
     return true;
 }
 
-void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator) {
+void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused, std::string& romPath) {
 
         ImGui_ImplSDL3_ProcessEvent(&e);
 
@@ -26,7 +26,7 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator) 
         ImGui::NewFrame();
 
         //Demo
-        //ImGui::ShowDemoWindow();
+        ImGui::ShowDemoWindow();
 
         // MOVE ALL OF THIS TO ITS OWN FILE!
 
@@ -56,6 +56,22 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator) 
         //ImGui::Text("Window Resolution: %dX%d", SCREEN_WIDTH, SCREEN_HEIGHT);
         //ImGui::Text("Emulator Resolution: %dX%d", EMU_WINDOW_WIDTH, EMU_WINDOW_HEIGHT);
         ImGui::PopFont();
+        ImGui::End();
+
+
+        ImGui::Begin("Options", NULL, ImGuiWindowFlags_NoCollapse);
+        if(ImGui::Button("Load Rom")) {
+            emulator.Startup(rom);
+        
+        }
+        ImGui::SameLine();
+        ImGui::InputText(rom, rom, IM_COUNTOF(rom));
+        if(ImGui::Button("Reload Rom")) {
+            // move into function so we dont duplicate
+            emulator.Startup(romPath);
+        }
+
+        ImGui::Checkbox("Pause Emulator", &paused);
         ImGui::End();
 
         int indexCount = 0;
