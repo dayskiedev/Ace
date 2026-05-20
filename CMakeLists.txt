@@ -95,3 +95,12 @@ add_custom_command(
 		$<TARGET_FILE_DIR:ace>
 )
 
+# copy the imgui.ini so ui is set how i want it
+add_custom_command(
+	TARGET ace
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+		${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini
+		$<TARGET_FILE_DIR:ace>
+)
+

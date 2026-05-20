@@ -17,7 +17,7 @@ cmake --build build
 ```
 6. Once the program has been built, simply run it, for windows its:
 ```
-.\build\Debug\ace.exe
+.\build\Debug\ace.exe path\to\rom
 ```
 You should be greeted with the following:
 

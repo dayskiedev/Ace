@@ -201,10 +201,7 @@ void c8_emulator::Cycle() {
             addValue = REGISTERS[n2] + REGISTERS[n3];
             REGISTERS[n2] = addValue;
             // unlike with 0x7, if this value exceeds 255, we indicate the overflow with flipping vf to 1
-            REGISTERS[15] = 0;         
-            if(addValue > 255) {    
-                REGISTERS[15] = 1;
-            } 
+            REGISTERS[15] = (addValue > 255 ? 1 : 0);
             break;
         case 0x5:
             //std::cout << "Set V" << std::hex << n2 << " To itself minus V" << n3 << "\n";

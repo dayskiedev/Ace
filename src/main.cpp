@@ -70,7 +70,7 @@ bool Init() {
 
     // Create Renderer for window
     gRenderer = SDL_CreateRenderer(gWindow, NULL);
-    if (gRenderer == NULL) {
+     if (gRenderer == NULL) {
         std::cout << "Renderer could not be created: " << SDL_GetError() << std::endl;
         return false;
     }
@@ -195,7 +195,7 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * EMULATOR_WIDTH;
 
-    rom = "to";
+    rom = "tetris";
 
     std::string path_to_rom = "roms/" + rom + ".ch8";
     if(!emulator.Startup(path_to_rom)) {
