@@ -69,7 +69,7 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, 
         if(ImGui::Button("Load Rom")) {
             if(!emulator.Startup(inputRom)) {
                 loadError = true;
-                emulator.Startup(curRom);
+                //emulator.Startup(curRom);
             } else {
                 curRom = inputRom;
                 loadError = false;
@@ -86,9 +86,12 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, 
         }
 
         if(ImGui::Button("Reload Rom")) {
-            emulator.Startup(curRom);
-            loadError = false;
-            paused = false;
+            if(!emulator.Startup(curRom)) {
+                loadError = true;
+            } else {
+                loadError = false;
+                paused = false;
+            }
         }
         ImGui::Checkbox("Pause Emulator", &paused);
         ImGui::End();

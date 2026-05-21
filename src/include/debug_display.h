@@ -21,8 +21,8 @@ class debug_display {
 
         std::string& GetRom() { return curRom; }
     private:
-    std::string curRom = "roms/tetris.ch8";
-    std::string inputRom = curRom;
+    std::string curRom {};
+    std::string inputRom = "roms/tetris.ch8";
     bool loadError = false;
 
     // used once
