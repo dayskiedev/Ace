@@ -26,9 +26,15 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, 
         ImGui::NewFrame();
 
         //Demo
-        ImGui::ShowDemoWindow();
+        //ImGui::ShowDemoWindow();
 
-        // MOVE ALL OF THIS TO ITS OWN FILE!
+        if(_startup) {
+            ImGui::Begin("Startup", NULL, ImGuiWindowFlags_NoCollapse);
+            ImGui::PushFont(NULL, 30);
+            ImGui::TextWrapped("Enter the directory to a rom and select 'Load Rom' to begin!");
+            ImGui::PopFont();
+            ImGui::End();
+        }      
 
         //custom gui stuff
         ImGui::Begin("Chip8 Information", NULL, ImGuiWindowFlags_NoCollapse);
@@ -67,6 +73,8 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, 
             } else {
                 curRom = inputRom;
                 loadError = false;
+                // we only need this once...
+                _startup = false;
             }
         
         }
