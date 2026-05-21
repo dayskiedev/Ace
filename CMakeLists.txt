@@ -41,6 +41,7 @@ add_library(imgui
     ${imgui_SOURCE_DIR}/imgui_tables.cpp
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
     ${imgui_SOURCE_DIR}/imgui_demo.cpp
+	${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
 
     # SDL3 backend
     ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl3.cpp
@@ -51,6 +52,7 @@ add_library(imgui
 target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
+	${imgui_SOURCE_DIR}/misc/cpp
 )
 target_link_libraries(imgui PUBLIC SDL3::SDL3)
 

@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlrenderer3.h"
+#include "imgui_stdlib.h"
 
 #include <string>
 #include <SDL3/SDL.h>
@@ -13,12 +14,14 @@
 
 class debug_display {
     public:
-        bool Init(SDL_Window* _window, SDL_Renderer* _renderer);
-        void Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused, std::string& romPath);
+        bool Init(SDL_Window* _window, SDL_Renderer* _renderer, std::string& inputRom);
+        void Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused);
         void Render(SDL_Renderer* renderer);
         void Close();
     private:
-    char rom[128] = "roms/romname.ch8";
+    std::string curRom;
+    std::string inputRom;
+    bool loadError = false;
 
 };
 

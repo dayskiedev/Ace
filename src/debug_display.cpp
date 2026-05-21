@@ -1,6 +1,6 @@
 #include "debug_display.h"
 
-bool debug_display::Init(SDL_Window* _window, SDL_Renderer* _renderer) {
+bool debug_display::Init(SDL_Window* _window, SDL_Renderer* _renderer, std::string& Rom) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -13,10 +13,13 @@ bool debug_display::Init(SDL_Window* _window, SDL_Renderer* _renderer) {
         return false;
     }
 
+    curRom = Rom;
+    inputRom = Rom;
+
     return true;
 }
 
-void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused, std::string& romPath) {
+void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused) {
 
         ImGui_ImplSDL3_ProcessEvent(&e);
 
@@ -61,16 +64,27 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, 
 
         ImGui::Begin("Options", NULL, ImGuiWindowFlags_NoCollapse);
         if(ImGui::Button("Load Rom")) {
-            emulator.Startup(rom);
+            if(!emulator.Startup(inputRom)) {
+                loadError = true;
+                emulator.Startup(curRom);
+            } else {
+                curRom = inputRom;
+                loadError = false;
+            }
         
         }
         ImGui::SameLine();
-        ImGui::InputText(rom, rom, IM_COUNTOF(rom));
-        if(ImGui::Button("Reload Rom")) {
-            // move into function so we dont duplicate
-            emulator.Startup(romPath);
+        ImGui::InputText("##", &inputRom);
+
+        if(loadError) {
+            ImGui::Text("Error loading Rom!");
         }
 
+        if(ImGui::Button("Reload Rom")) {
+            emulator.Startup(curRom);
+            loadError = false;
+            paused = false;
+        }
         ImGui::Checkbox("Pause Emulator", &paused);
         ImGui::End();
 

@@ -182,11 +182,6 @@ int main(int argc, char* args[]){
     c8_utils utils;
     debug_display debug_gui;
 
-    if(!debug_gui.Init(gWindow, gRenderer)) {
-        SDL_Log("Unable to init Dear Imgui!\n");
-        return -1;
-    }
-
     // no idea what SDL_PIXELFORMAT_RGBA8888 does...
     // SDL_TEXTUREACCESS_STREAMING = texture changes constantly (it does)
     // when screen width is doubled you gget 2 copies of the texture, when screen height is doubled it crashes..
@@ -202,6 +197,12 @@ int main(int argc, char* args[]){
         std::cout << "Error loading emulator, unable to launch.";
         return -1;
     }
+
+    if(!debug_gui.Init(gWindow, gRenderer, path_to_rom)) {
+        SDL_Log("Unable to init Dear Imgui!\n");
+        return -1;
+    }
+
 
     int exitCode { 0 };
     bool quit { false }; 
@@ -233,7 +234,7 @@ int main(int argc, char* args[]){
         if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
         // update imgui
-        debug_gui.Update(e, utils, emulator, Pause, path_to_rom);
+        debug_gui.Update(e, utils, emulator, Pause);
 
         // emulator update
         if(!Pause) {
