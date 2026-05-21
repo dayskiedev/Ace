@@ -14,14 +14,19 @@
 
 class debug_display {
     public:
-        bool Init(SDL_Window* _window, SDL_Renderer* _renderer, std::string& inputRom);
+        bool Init(SDL_Window* _window, SDL_Renderer* _renderer);
         void Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused);
         void Render(SDL_Renderer* renderer);
         void Close();
+
+        std::string& GetRom() { return curRom; }
     private:
-    std::string curRom;
-    std::string inputRom;
+    std::string curRom = "roms/tetris.ch8";
+    std::string inputRom = curRom;
     bool loadError = false;
+
+    // used once
+    bool _startup = true;
 
 };
 

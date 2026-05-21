@@ -1,6 +1,6 @@
 #include "debug_display.h"
 
-bool debug_display::Init(SDL_Window* _window, SDL_Renderer* _renderer, std::string& Rom) {
+bool debug_display::Init(SDL_Window* _window, SDL_Renderer* _renderer) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -12,9 +12,6 @@ bool debug_display::Init(SDL_Window* _window, SDL_Renderer* _renderer, std::stri
     if(!ImGui_ImplSDLRenderer3_Init(_renderer)) {
         return false;
     }
-
-    curRom = Rom;
-    inputRom = Rom;
 
     return true;
 }

@@ -38,8 +38,6 @@ int _instructionsPerSec = 700;
 // the number of ticks (for timers) to occur each second
 int _ticksPerSec = 60;
 
-std::string rom = "";
-
 std::string PROGRAM_NAME { "Ace" };
 
 int SCREEN_SCALE { 1 };
@@ -163,14 +161,6 @@ void CheckForInput(SDL_Event& e, c8_emulator& c8) {
 // tick seperate function for timers? can keep timing seperate to cycle and allows them to run when a cycle is paused for input
 
 int main(int argc, char* args[]){
-    std::cout << "Launching... \n";
-    // if(argc <= 1) {
-    //     std::cout << "Error, no ROM specified (include the path to ROM in launch) \nClosing...\n";
-    //     return -1;
-    // }
-    // // 
-    // rom = args[1]; 
-    
     // setup SDL
     if(!Init()) {
         SDL_Log("Unable to init!\n");
@@ -190,19 +180,10 @@ int main(int argc, char* args[]){
     // look into thiss
     int video_pitch = sizeof(emulator.VIDEO[0]) * EMULATOR_WIDTH;
 
-    rom = "tetris";
-
-    std::string path_to_rom = "roms/" + rom + ".ch8";
-    if(!emulator.Startup(path_to_rom)) {
-        std::cout << "Error loading emulator, unable to launch.";
-        return -1;
-    }
-
-    if(!debug_gui.Init(gWindow, gRenderer, path_to_rom)) {
+    if(!debug_gui.Init(gWindow, gRenderer)) {
         SDL_Log("Unable to init Dear Imgui!\n");
         return -1;
     }
-
 
     int exitCode { 0 };
     bool quit { false }; 
@@ -261,7 +242,7 @@ int main(int argc, char* args[]){
             }
             else if(e.key.key == SDLK_O) {
                 Pause = true;
-                emulator.Startup(path_to_rom);
+                emulator.Startup(debug_gui.GetRom());
                 Pause = false;
             }
         } 
