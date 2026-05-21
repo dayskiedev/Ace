@@ -215,7 +215,7 @@ int main(int argc, char* args[]){
         if( e.type == SDL_EVENT_QUIT ) { quit = true; }
 
         // update imgui
-        debug_gui.Update(e, utils, emulator, Pause);
+        debug_gui.Update(e, utils, emulator, Pause, insTickCount, tickCount);
 
         // emulator update
         if(!Pause) {

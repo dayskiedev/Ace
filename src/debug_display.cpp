@@ -16,7 +16,7 @@ bool debug_display::Init(SDL_Window* _window, SDL_Renderer* _renderer) {
     return true;
 }
 
-void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused) {
+void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused, double ic, double tc) {
 
         ImGui_ImplSDL3_ProcessEvent(&e);
 
@@ -42,8 +42,6 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, 
         //ImGui::Text(("Current Rom: " + rom).c_str());
         ImGui::TextColored(ImVec4(0.0f, 1.0f, 1.0f, 1.0f), ("Program Counter: " + std::to_string(emulator.GetPC())).c_str());
         ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), ("Index Register: " + std::to_string(emulator.GetIR())).c_str());
-        //ImGui::Text(("Tick Count: " + std::to_string(tickCount)).c_str());
-        //ImGui::Text(("Instruction Count: " + std::to_string(insTickCount)).c_str());
         ImGui::PopFont();
         ImGui::End();
 
@@ -59,8 +57,12 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, 
 
         ImGui::Begin("ACE Information", NULL, ImGuiWindowFlags_NoCollapse);
         ImGui::PushFont(NULL, 18);
-        //ImGui::Text("Window Resolution: %dX%d", SCREEN_WIDTH, SCREEN_HEIGHT);
-        //ImGui::Text("Emulator Resolution: %dX%d", EMU_WINDOW_WIDTH, EMU_WINDOW_HEIGHT);
+        ImGui::Text("Window Resolution: %dX%d", 1280, 720);
+        ImGui::Text("Emulator Resolution: %dX%d", 640, 320);
+        ImGui::Text("\nTicks per sec: 60");
+        ImGui::Text("Instructions per sec: 700");
+        ImGui::Text(("Tick Count: " + std::to_string(tc)).c_str());
+        ImGui::Text(("Instruction Count: " + std::to_string(ic)).c_str());
         ImGui::PopFont();
         ImGui::End();
 

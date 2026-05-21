@@ -15,7 +15,7 @@
 class debug_display {
     public:
         bool Init(SDL_Window* _window, SDL_Renderer* _renderer);
-        void Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused);
+        void Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, bool& paused, double ic, double tc);
         void Render(SDL_Renderer* renderer);
         void Close();
 
