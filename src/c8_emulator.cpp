@@ -415,6 +415,4 @@ void c8_emulator::Cycle() {
         std::cout << "Unknown Nibble... \n";
         break;
     }
-    
-    // should be before we do instruction stuff for some reason?
 }

@@ -9,7 +9,7 @@ My version of a Chip8 emulator (Also using it to practice CMake)
 ```cmake
 cmake -S . -B build
 ```
-**If you do not have SDL3 Installed, it will be installed and placed in a _deps folder inside this project.**
+**!The makefile will install SDL3, SDL_Mixer and ImGUi into the project directory even if you already have them downloaded!**
 
 5. Once the configuration has finished, run:
 ```cmake
@@ -17,8 +17,10 @@ cmake --build build
 ```
 6. Once the program has been built, simply run it, for windows its:
 ```
-.\build\Debug\ace.exe path\to\rom
+.\build\Debug\ace.exe 
 ```
+* Or you can click on the Ace.exe file itself
+
 You should be greeted with the following:
 
 <center><img src="images/example.png" alt="drawing" width="500"/></>

@@ -15,14 +15,6 @@
 // Ref: https://tobiasvl.github.io/blog/write-a-chip-8-emulator/
 // Ref: http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
 
-// change build structure/initial setup, run cmake -S . -B build
-// to actually build, run cmake --build build
-// then ./debug/ace.exe
-
-// if SDL3 is properly installed, this should work
-
-// constexpr evaluates at compile rather than runtime
-// brace init for type safety (?)
 constexpr int SCREEN_WIDTH { 1280 };
 constexpr int SCREEN_HEIGHT { 720 }; 
 
@@ -46,9 +38,6 @@ bool Pause = false;
 
 SDL_Window* gWindow { nullptr };
 SDL_Renderer* gRenderer { nullptr };
-
-// Check specific memory location for font and print
-// it to see if output is valid
 
 bool Init() {
 	//initialze sdl
@@ -92,9 +81,6 @@ void Close()
     SDL_Quit();
 }
 
-// we dont want to just set the register whenever
-// we want to wait until we are requesting an input
-// we only need to set the hexideceimal value
 
 void CheckForInput(SDL_Event& e, c8_emulator& c8) {
     if(e.type == SDL_EVENT_KEY_DOWN) {
@@ -158,7 +144,7 @@ void CheckForInput(SDL_Event& e, c8_emulator& c8) {
 
     // when a key is not down, set hexvalue to -99 or something out of range
 }
-// tick seperate function for timers? can keep timing seperate to cycle and allows them to run when a cycle is paused for input
+
 
 int main(int argc, char* args[]){
     // setup SDL
@@ -174,7 +160,6 @@ int main(int argc, char* args[]){
 
     // no idea what SDL_PIXELFORMAT_RGBA8888 does...
     // SDL_TEXTUREACCESS_STREAMING = texture changes constantly (it does)
-    // when screen width is doubled you gget 2 copies of the texture, when screen height is doubled it crashes..
     SDL_Texture* videoTexture = SDL_CreateTexture(gRenderer, SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_STREAMING, EMULATOR_WIDTH, EMULATOR_HEIGHT);
     SDL_SetTextureScaleMode(videoTexture, SDL_SCALEMODE_PIXELART);
     // look into thiss

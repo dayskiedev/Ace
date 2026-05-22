@@ -3,5 +3,10 @@ build/*
 
 roms/*
 !roms/.gitkeep
+!roms/credits.txt
+!roms/tetris.ch8
+!roms/Pong.ch8
+!roms/sa.ch8
+!roms/down8.ch8
 
 notes.txt
