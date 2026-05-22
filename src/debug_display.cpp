@@ -97,6 +97,7 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, 
             }
         }
         ImGui::Checkbox("Pause Emulator", &paused);
+        ImGui::Checkbox("Mute SFX", &emulator.GetMuted());
         ImGui::End();
 
         int indexCount = 0;

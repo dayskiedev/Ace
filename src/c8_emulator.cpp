@@ -87,7 +87,9 @@ void c8_emulator::Tick() {
     if(SOUND_TIMER > 0) {
         SOUND_TIMER--;
         // play beep.
-        MIX_PlayAudio(mixer, beep);
+        if(!muted) {
+            MIX_PlayAudio(mixer, beep);
+        }
     }
 }
 

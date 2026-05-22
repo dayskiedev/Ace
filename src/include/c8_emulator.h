@@ -36,6 +36,9 @@ class c8_emulator {
     const int GetPC() { return PROGRAM_COUNTER; }
     const int GetIR() { return INDEX_REGISTER; }
     const int GetRV(int RX) { return REGISTERS[RX]; }
+
+    bool& GetMuted() { return muted; }
+
     const std::stack<uint16_t> GetAS() { return ADDRESS_STACK; } // should be a reference somehow...
 
     // on = 0xFFFFFFFF 
@@ -67,7 +70,7 @@ class c8_emulator {
     int romSize{};
     int _RAND_SEED = 42;   // Makes it easy to recreate random events for debugging 
     //bool _OUTPUT_OPCODES = false;
-    
+    bool muted;
 };
 
 
