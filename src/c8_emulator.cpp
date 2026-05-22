@@ -17,6 +17,25 @@ bool c8_emulator::Startup(std::string path_to_rom) {
     }
 
 
+    // load mixer (literally for one sound lol)
+    if(!MIX_Init()) {
+        std::cout << ("Unable to Init SDL_Mixer!\n");
+        return false;
+    }
+
+    mixer = MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, NULL);
+    if (mixer == nullptr) {
+        std::cout << "Unable to init mixer device.\n";
+        return false;
+    }
+
+    beep = MIX_LoadAudio(NULL, "sfx/beep.mp3", false);
+    if(beep == nullptr) {
+        std::cout << "Warning, sound not set!\n";
+    }
+    MIX_SetMixerGain(mixer, 0.1);
+
+
     // next we attempt to load a rom from the specified path
     std::cout << "Input path: " << path_to_rom << std::endl;
 
@@ -68,6 +87,7 @@ void c8_emulator::Tick() {
     if(SOUND_TIMER > 0) {
         SOUND_TIMER--;
         // play beep.
+        MIX_PlayAudio(mixer, beep);
     }
 }
 

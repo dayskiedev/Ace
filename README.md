@@ -21,4 +21,4 @@ cmake --build build
 ```
 You should be greeted with the following:
 
-<center><img src="images/example.png" alt="drawing" width="200"/></>
+<center><img src="images/example.png" alt="drawing" width="500"/></>

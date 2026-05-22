@@ -77,6 +77,7 @@ void debug_display::Update(SDL_Event e, c8_utils& utils, c8_emulator& emulator, 
                 loadError = false;
                 // we only need this once...
                 _startup = false;
+                paused = false;
             }
         
         }

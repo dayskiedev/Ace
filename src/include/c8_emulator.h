@@ -11,6 +11,8 @@
 
 #include "c8_font.h"
 
+#include "SDL3_mixer/SDL_mixer.h"
+
 #define PIXEL_ON 0xFFFFFFFF
 #define PIXEL_OFF 0x00000000
 
@@ -53,8 +55,10 @@ class c8_emulator {
 
     uint8_t INPUT_VALUE {99};                // default to 99 so out of range, if value is anything but 99 we know we have an input?
 
-    // Toggles
+    MIX_Mixer *mixer;
+    MIX_Audio *beep;
 
+    // Toggles
     bool _USE_OLD_MEMORY_STORE_LOAD = true; // In older chip8 implementations, when storing or loading memory the IR would be incremented by X+1, however newer models dont do this
     bool _USE_OLD_JUMP_WITH_OFFSET = true;   // older versions have this instruction set the PC to NNN + V0, but modern versions change this to PC = XNN + reg[vx]
     bool _USE_OLD_BIT_SHIFT = false;         // older versions first set VX to the value of VY before shifting

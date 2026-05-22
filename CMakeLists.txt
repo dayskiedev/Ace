@@ -33,6 +33,15 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(imgui)
 
+# SDL_ixer
+FetchContent_Declare(
+	SDL_mixer
+	GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git 	
+   	GIT_TAG a5e1890afc5115ffd16cefdbb4d50f74bf4970ce		# release 3.2.2
+)
+
+FetchContent_MakeAvailable(SDL_mixer)
+
 # we are basically just downloading raw h and cpp files, and organising them into a lib to compile ith the exec_program(
 # we could just put these in target sources but this is cleaner
 add_library(imgui 
@@ -75,7 +84,7 @@ target_sources(ace
 )
 
 # link SDL3 (SDL3 provides a Cmake target, imgui doesnt)
-target_link_libraries(ace PRIVATE SDL3::SDL3 imgui)
+target_link_libraries(ace PRIVATE SDL3_mixer::SDL3_mixer SDL3::SDL3 imgui)
 
 #file(COPY roms DESTINATION $<TARGET_FILE_DIR:tgt>)
 
@@ -104,5 +113,23 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy
 		${CMAKE_CURRENT_SOURCE_DIR}/imgui.ini
 		$<TARGET_FILE_DIR:ace>
+)
+
+# copy Mixer over
+add_custom_command(
+	TARGET ace
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+		$<TARGET_FILE:SDL3_mixer::SDL3_mixer>
+		$<TARGET_FILE_DIR:ace>
+)
+
+# Copy sfx over
+add_custom_command(
+	TARGET ace
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${CMAKE_CURRENT_SOURCE_DIR}/sfx
+		$<TARGET_FILE_DIR:ace>/sfx
 )
 
